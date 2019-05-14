@@ -1,0 +1,21 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+flask = "*"
+sqlalchemy = "*"
+marshmallow = "*"
+flask-sqlalchemy = "*"
+flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
+connexion = {extras = ["swagger-ui"],version = "*"}
+
+[requires]
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true

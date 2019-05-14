@@ -1,0 +1,3 @@
+[submodule "ext/podcast-db"]
+	path = ext/podcast-db
+	url = git@gitlab.com:cadence13-com/podcast-py/podcast-db.git
