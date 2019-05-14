@@ -1,0 +1,269 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Cadence13 Dashboard API
+
+paths:
+  /networks:
+    get:
+      summary: List all authorized networks
+      operationId: cadence13.api.dashboard.network.get_networks
+      tags:
+        - networks
+      responses:
+        '200':
+          description: An array of networks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Network'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new network
+      operationId: cadence13.api.dashboard.network.create_network
+      tags:
+        - networks
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /networks/{networkGuid}/podcasts:
+    get:
+      summary: List all podcasts in a network
+      operationId: cadence13.api.dashboard.network.get_podcasts
+      tags:
+        - networks
+        - podcasts
+      parameters:
+        - name: networkGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts:
+    get:
+      summary: List all authorized podcasts
+      operationId: cadence13.api.dashboard.podcast.get_podcasts
+      tags:
+        - podcasts
+      responses:
+        '200':
+          description: A paged array of pets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Podcast'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/{podcastGuid}:
+    get:
+      summary: Gets a podcast
+      operationId: cadence13.api.dashboard.podcast.get_podcast
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update an existing podcast
+      operationId: cadence13.api.dashboard.podcast.update_podcast
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /podcasts/{podcastGuid}/episodes:
+    get:
+      summary: List all episodes in a podcast
+      operationId: cadence13.api.dashboard.podcast.get_episodes
+      tags:
+        - podcasts
+        - episodes
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: A paged array of episodes
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: '#/components/schemas/Episode'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/{podcastGuid}/network/{networkGuid}:
+    post:
+      summary: Update or create a podcast's network association
+      operationId: cadence13.api.dashboard.podcast.assign_network
+      tags:
+        - podcasts
+        - networks
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: networkGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /episodes/{episodeGuid}:
+    patch:
+      summary: Update an existing episode
+      operationId: cadence13.api.dashboard.episode.update_episode
+      tags:
+        - episodes
+      parameters:
+        - name: episodeGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    UUID:
+      type: string
+      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+
+    Network:
+      required:
+        - guid
+        - name
+      properties:
+        guid:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+
+    Podcast:
+      required:
+        - guid
+        - slug
+      properties:
+        guid:
+          $ref: '#/components/schemas/UUID'
+        slug:
+          type: string
+
+    Episode:
+      required:
+        - guid
+      properties:
+        guid:
+          $ref: "#/components/schemas/UUID"
+        season_no:
+          type: integer
+          format: int32
+        episode_no:
+          type: integer
+          format: int32
+        title:
+          type: string
+        subtitle:
+          type: string
+        summary:
+          type: string
+        author:
+          type: string
+        episode_type:
+          type: string
+        image_url:
+          type: string
+        audio_url:
+          type: string
+        is_explicit:
+          type: boolean
+        published_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
