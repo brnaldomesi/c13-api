@@ -1,2 +1,2 @@
 def update_episode():
-    return 501, 'Not implemented'
+    return 'Not implemented', 501

@@ -1,10 +1,10 @@
 def get_networks():
-    return 501, 'Not implemented'
+    return 'Not implemented', 501
 
 
 def create_network():
-    return 501, 'Not implemented'
+    return 'Not implemented', 501
 
 
 def get_podcasts():
-    return 501, 'Not implemented'
+    return 'Not implemented', 501
