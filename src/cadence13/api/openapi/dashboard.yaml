@@ -90,6 +90,13 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
+        '200':
+          description: Detailed information for a podcast
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Podcast'
+
         default:
           description: unexpected error
           content:
@@ -145,20 +152,194 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /podcasts/{podcastGuid}/network/{networkGuid}:
-    post:
-      summary: Update or create a podcast's network association
-      operationId: cadence13.api.dashboard.podcast.assign_network
+  /podcasts/{podcastGuid}/subscription-urls:
+    get:
+      operationId: cadence13.api.dashboard.podcast.get_subscription_urls
       tags:
         - podcasts
-        - networks
       parameters:
         - name: podcastGuid
           in: path
           required: true
           schema:
             $ref: '#/components/schemas/UUID'
-        - name: networkGuid
+      responses:
+        200:
+          description: Array of podcast subscriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionUrls'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      operationId: cadence13.api.dashboard.podcast.patch_subscription_urls
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionUrls'
+      responses:
+        200:
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionUrls'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/{podcastGuid}/social-media-urls:
+    get:
+      operationId: cadence13.api.dashboard.podcast.get_social_media_urls
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Social media URLs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialMediaUrls'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      operationId: cadence13.api.dashboard.podcast.patch_social_media_urls
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocialMediaUrls'
+      responses:
+        200:
+          description: Social media URLs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialMediaUrls'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/{podcastGuid}/staff:
+    get:
+      summary: Get a list of staffers associated with the podcast
+      operationId: cadence13.api.dashboard.podcast.get_staff
+      tags:
+        - podcasts
+        - staff
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: An array of staffers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Staffer'
+
+    post:
+      operationId: cadence13.api.dashboard.podcast.create_staffer
+      tags:
+        - podcasts
+        - staff
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /staffer/{stafferGuid}:
+    patch:
+      operationId: cadence13.api.dashboard.podcast.update_staffer
+      tags:
+        - staff
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: stafferGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Staffer'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      operationId: cadence13.api.dashboard.podcast.delete_staffer
+      tags:
+        - staff
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: stafferGuid
           in: path
           required: true
           schema:
@@ -197,6 +378,11 @@ components:
       type: string
       pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
 
+    ImageUrls:
+      properties:
+        original:
+          type: string
+
     Network:
       required:
         - guid
@@ -207,15 +393,143 @@ components:
         name:
           type: string
 
+    SubscriptionUrls:
+      properties:
+        applePodcasts:
+          type: string
+          nullable: true
+        googlePlay:
+          type: string
+          nullable: true
+        googlePodcasts:
+          type: string
+          nullable: true
+        stitcher:
+          type: string
+          nullable: true
+        spotify:
+          type: string
+          nullable: true
+        radioCom:
+          type: string
+          nullable: true
+        iHeart:
+          type: string
+          nullable: true
+        locked:
+          type: array
+          items:
+            type: string
+            enum:
+              - applePodcasts
+              - googlePlay
+              - googlePodcasts
+              - stitcher
+              - spotify
+              - radioCom
+              - iHeart
+
+    SocialMediaUrls:
+      properties:
+        facebook:
+          type: string
+          nullable: true
+        pinterest:
+          type: string
+          nullable: true
+        instagram:
+          type: string
+          nullable: true
+        twitter:
+          type: string
+          nullable: true
+        reddit:
+          type: string
+          nullable: true
+        locked:
+          type: array
+          items:
+            type: string
+            enum:
+              - facebook
+              - pinterest
+              - instagram
+              - twitter
+              - reddit
+
+    Staffer:
+      properties:
+        guid:
+          $ref: '#/components/schemas/UUID'
+        role:
+          type: string
+        firstName:
+          type: string
+        middleName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+        biography:
+          type: string
+        imageUrls:
+          $ref: '#/components/schemas/ImageUrls'
+
     Podcast:
-      required:
-        - guid
-        - slug
       properties:
         guid:
           $ref: '#/components/schemas/UUID'
         slug:
           type: string
+        title:
+          type: string
+        subtitle:
+          type: string
+          nullable: true
+        summary:
+          type: string
+        copyright:
+          type: string
+        author:
+          type: string
+        websiteUrl:
+          type: string
+        feedUrl:
+          type: string
+        imageUrls:
+          $ref: '#/components/schemas/ImageUrls'
+        ownerName:
+          type: string
+        ownerEmail:
+          type: string
+        podcastType:
+          type: string
+          enum:
+            - EPISODIC
+            - SERIAL
+        isExplicit:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        subscriptionUrls:
+          $ref: '#/components/schemas/SubscriptionUrls'
+        socialMediaUrls:
+          $ref: '#/components/schemas/SocialMediaUrls'
+        staff:
+          type: array
+          items:
+            $ref: '#/components/schemas/Staffer'
+        tags:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            type: string
 
     Episode:
       required:
