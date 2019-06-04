@@ -67,6 +67,9 @@ def get_podcast(podcastGuid):
         ],
         'categories': [
             'News & Politics'
+        ],
+        'locked': [
+            'title', 'summary'
         ]
     }
 

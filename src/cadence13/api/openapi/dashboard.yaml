@@ -11,7 +11,7 @@ paths:
       tags:
         - networks
       responses:
-        '200':
+        200:
           description: An array of networks
           content:
             application/json:
@@ -64,7 +64,7 @@ paths:
       tags:
         - podcasts
       responses:
-        '200':
+        200:
           description: A paged array of pets
           content:
             application/json:
@@ -90,7 +90,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        '200':
+        200:
           description: Detailed information for a podcast
           content:
             application/json:
@@ -137,7 +137,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        '200':
+        200:
           description: A paged array of episodes
           content:
             application/json:
@@ -258,13 +258,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /podcasts/{podcastGuid}/staff:
+  /podcasts/{podcastGuid}/crew-members:
     get:
-      summary: Get a list of staffers associated with the podcast
+      summary: Get a list of crew members associated with the podcast
       operationId: cadence13.api.dashboard.podcast.get_staff
       tags:
         - podcasts
-        - staff
+        - crew
       parameters:
         - name: podcastGuid
           in: path
@@ -273,73 +273,21 @@ paths:
             $ref: '#/components/schemas/UUID'
       responses:
         200:
-          description: An array of staffers
+          description: An array of crew members
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Staffer'
+                  $ref: '#/components/schemas/CrewMember'
 
     post:
-      operationId: cadence13.api.dashboard.podcast.create_staffer
+      operationId: cadence13.api.dashboard.crew.create_crew_member
       tags:
         - podcasts
-        - staff
+        - crew
       parameters:
         - name: podcastGuid
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      responses:
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /staffer/{stafferGuid}:
-    patch:
-      operationId: cadence13.api.dashboard.podcast.update_staffer
-      tags:
-        - staff
-      parameters:
-        - name: podcastGuid
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-        - name: stafferGuid
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Staffer'
-      responses:
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    delete:
-      operationId: cadence13.api.dashboard.podcast.delete_staffer
-      tags:
-        - staff
-      parameters:
-        - name: podcastGuid
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-        - name: stafferGuid
           in: path
           required: true
           schema:
@@ -372,6 +320,70 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /crew-members/{crewMemberGuid}:
+    get:
+      summary: Get crew member details
+      operationId: cadence13.api.dashboard.crew.get_crew_member
+      tags:
+        - crew
+      parameters:
+        - name: crewMemberGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Return a single crew member
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrewMember'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      summary: Update crew member details
+      operationId: cadence13.api.dashboard.crew.patch_crew_member
+      tags:
+        - crew
+      parameters:
+        - name: crewMemberGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete crew member
+      operationId: cadence13.api.dashboard.crew.delete_crew_member
+      tags:
+        - crew
+      parameters:
+        - name: crewMemberGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     UUID:
@@ -381,6 +393,8 @@ components:
     ImageUrls:
       properties:
         original:
+          type: string
+        600px:
           type: string
 
     Network:
@@ -457,12 +471,18 @@ components:
               - twitter
               - reddit
 
-    Staffer:
+    CrewRole:
+      type: string
+      enum:
+        - HOST
+        - CO_HOST
+
+    CrewMember:
       properties:
         guid:
           $ref: '#/components/schemas/UUID'
         role:
-          type: string
+          $ref: '#/components/schemas/CrewRole'
         firstName:
           type: string
         middleName:
@@ -474,6 +494,30 @@ components:
           type: string
         imageUrls:
           $ref: '#/components/schemas/ImageUrls'
+
+    PodcastBase:
+      properties:
+        guid:
+          $ref: '#/components/schemas/UUID'
+        slug:
+          type: string
+        title:
+          type: string
+        imageUrls:
+          $ref: '#/components/schemas/ImageUrls'
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        tags:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            type: string
 
     Podcast:
       properties:
@@ -518,10 +562,10 @@ components:
           $ref: '#/components/schemas/SubscriptionUrls'
         socialMediaUrls:
           $ref: '#/components/schemas/SocialMediaUrls'
-        staff:
+        crew:
           type: array
           items:
-            $ref: '#/components/schemas/Staffer'
+            $ref: '#/components/schemas/CrewMember'
         tags:
           type: array
           items:
@@ -530,6 +574,16 @@ components:
           type: array
           items:
             type: string
+        locked:
+          type: array
+          items:
+            type: string
+            enum:
+              - slug
+              - title
+              - subtitle
+              - summary
+              - image
 
     Episode:
       required:
