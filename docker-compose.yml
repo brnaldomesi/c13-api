@@ -19,16 +19,17 @@ services:
 #    depends_on:
 #      - podcast-pages
 
-  dashboard-api:
+  showtime-api:
     build: .
-    command: "dashboard"
+    command: "showtime"
     ports:
       - 8080:8080
     volumes:
       - ./src:/opt/cadence13/podcast-api/src
       - ./ext:/opt/cadence13/podcast-api/ext
+      - ./conf:/opt/cadence13/podcast-api/conf
     environment:
-      DB_URL: 'postgresql://postgres:postgres@postgres/postgres'
+      CONFIG_URL: 'file:///opt/cadence13/podcast-api/conf/config_dev.json'
 
 #volumes:
 #  postgres-data: {}

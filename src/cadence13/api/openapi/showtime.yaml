@@ -7,7 +7,7 @@ paths:
   /networks:
     get:
       summary: List all authorized networks
-      operationId: cadence13.api.dashboard.network.get_networks
+      operationId: cadence13.api.showtime.network.get_networks
       tags:
         - networks
       responses:
@@ -25,7 +25,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     post:
       summary: Create a new network
-      operationId: cadence13.api.dashboard.network.create_network
+      operationId: cadence13.api.showtime.network.create_network
       tags:
         - networks
       responses:
@@ -39,7 +39,7 @@ paths:
   /networks/{networkGuid}/podcasts:
     get:
       summary: List all podcasts in a network
-      operationId: cadence13.api.dashboard.network.get_podcasts
+      operationId: cadence13.api.showtime.network.get_podcasts
       tags:
         - networks
         - podcasts
@@ -60,7 +60,7 @@ paths:
   /podcasts:
     get:
       summary: List all authorized podcasts
-      operationId: cadence13.api.dashboard.podcast.get_podcasts
+      operationId: cadence13.api.showtime.podcast.get_podcasts
       tags:
         - podcasts
       responses:
@@ -80,7 +80,7 @@ paths:
   /podcasts/{podcastGuid}:
     get:
       summary: Gets a podcast
-      operationId: cadence13.api.dashboard.podcast.get_podcast
+      operationId: cadence13.api.showtime.podcast.get_podcast
       tags:
         - podcasts
       parameters:
@@ -105,7 +105,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     patch:
       summary: Update an existing podcast
-      operationId: cadence13.api.dashboard.podcast.update_podcast
+      operationId: cadence13.api.showtime.podcast.update_podcast
       tags:
         - podcasts
       parameters:
@@ -126,7 +126,7 @@ paths:
   /podcasts/{podcastGuid}/episodes:
     get:
       summary: List all episodes in a podcast
-      operationId: cadence13.api.dashboard.podcast.get_episodes
+      operationId: cadence13.api.showtime.podcast.get_episodes
       tags:
         - podcasts
         - episodes
@@ -154,7 +154,7 @@ paths:
 
   /podcasts/{podcastGuid}/subscription-urls:
     get:
-      operationId: cadence13.api.dashboard.podcast.get_subscription_urls
+      operationId: cadence13.api.showtime.podcast.get_subscription_urls
       tags:
         - podcasts
       parameters:
@@ -177,7 +177,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     patch:
-      operationId: cadence13.api.dashboard.podcast.patch_subscription_urls
+      operationId: cadence13.api.showtime.podcast.patch_subscription_urls
       tags:
         - podcasts
       parameters:
@@ -207,7 +207,7 @@ paths:
 
   /podcasts/{podcastGuid}/social-media-urls:
     get:
-      operationId: cadence13.api.dashboard.podcast.get_social_media_urls
+      operationId: cadence13.api.showtime.podcast.get_social_media_urls
       tags:
         - podcasts
       parameters:
@@ -230,7 +230,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     patch:
-      operationId: cadence13.api.dashboard.podcast.patch_social_media_urls
+      operationId: cadence13.api.showtime.podcast.patch_social_media_urls
       tags:
         - podcasts
       parameters:
@@ -261,7 +261,7 @@ paths:
   /podcasts/{podcastGuid}/crew-members:
     get:
       summary: Get a list of crew members associated with the podcast
-      operationId: cadence13.api.dashboard.podcast.get_staff
+      operationId: cadence13.api.showtime.podcast.get_crew_members
       tags:
         - podcasts
         - crew
@@ -282,7 +282,7 @@ paths:
                   $ref: '#/components/schemas/CrewMember'
 
     post:
-      operationId: cadence13.api.dashboard.crew.create_crew_member
+      operationId: cadence13.api.showtime.crew.create_crew_member
       tags:
         - podcasts
         - crew
@@ -300,10 +300,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /podcasts/{podcastGuid}/image-upload-url:
+    post:
+      summary: Generate a pre-signed URL to where an image will be uploaded
+      operationId: cadence13.api.showtime.podcast.create_image_upload_url
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: The presigned POST URL and S3 access credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignedS3PostUrl'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
   /episodes/{episodeGuid}:
     patch:
       summary: Update an existing episode
-      operationId: cadence13.api.dashboard.episode.update_episode
+      operationId: cadence13.api.showtime.episode.update_episode
       tags:
         - episodes
       parameters:
@@ -323,7 +350,7 @@ paths:
   /crew-members/{crewMemberGuid}:
     get:
       summary: Get crew member details
-      operationId: cadence13.api.dashboard.crew.get_crew_member
+      operationId: cadence13.api.showtime.crew.get_crew_member
       tags:
         - crew
       parameters:
@@ -348,7 +375,7 @@ paths:
 
     patch:
       summary: Update crew member details
-      operationId: cadence13.api.dashboard.crew.patch_crew_member
+      operationId: cadence13.api.showtime.crew.patch_crew_member
       tags:
         - crew
       parameters:
@@ -367,7 +394,7 @@ paths:
 
     delete:
       summary: Delete crew member
-      operationId: cadence13.api.dashboard.crew.delete_crew_member
+      operationId: cadence13.api.showtime.crew.delete_crew_member
       tags:
         - crew
       parameters:
@@ -384,11 +411,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+
+  /crew-members/{crewMemberGuid}/image-upload-url:
+    post:
+      summary: Generate a pre-signed URL to where an image will be uploaded
+      operationId: cadence13.api.showtime.crew.create_image_upload_url
+      tags:
+        - crew
+      parameters:
+        - name: crewMemberGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: The presigned POST URL and S3 access credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignedS3PostUrl'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
 components:
   schemas:
     UUID:
       type: string
       pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+
+    PresignedS3PostUrl:
+      properties:
+        url:
+          type: string
+        fields:
+          type: object
 
     ImageUrls:
       properties:
@@ -553,6 +615,7 @@ components:
             - SERIAL
         isExplicit:
           type: boolean
+          nullable: true
         status:
           type: string
           enum:
