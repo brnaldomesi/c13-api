@@ -1,6 +1,7 @@
 from cadence13.api.util.logging import get_logger
 import os.path
 import connexion
+from flask_cors import CORS
 from cadence13.api.util.db import db
 from cadence13.api.util.config import config_manager
 
@@ -20,6 +21,9 @@ config = config_manager.get_config()
 
 # Get the underlying Flask application
 app = rest_app.app
+
+# Configure CORS
+CORS(app)
 
 # Configure the app with database settings
 app.config['SQLALCHEMY_DATABASE_URI'] = config['database_url']

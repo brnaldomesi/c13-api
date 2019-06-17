@@ -16,6 +16,7 @@ connexion = {extras = ["swagger-ui"],version = "*"}
 boto3 = "*"
 marshmallow-enum = "*"
 psycopg2-binary = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.7"
