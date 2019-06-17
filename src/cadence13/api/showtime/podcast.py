@@ -190,6 +190,10 @@ def get_crew_members(podcastGuid):
 
 
 def create_image_upload_url(podcastGuid):
+    # s3 = boto3.client('s3',
+    #   aws_access_key_id='',
+    #   aws_secret_access_key=''
+    # )
     s3 = boto3.client('s3')
     key = 'podcasts/{}/{}/original.jpg'.format(podcastGuid, int(time.time()))
     return s3.generate_presigned_post(
