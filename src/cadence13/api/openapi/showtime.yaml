@@ -96,6 +96,10 @@ paths:
                       prev:
                         type: string
                         example: '/podcasts?endingBefore=acf6611b-6c4f-4c4f-b6d0-40a38c8abdb9'
+                  count:
+                    type: integer
+                  hasMore:
+                    type: boolean
                   results:
                     type: array
                     items:

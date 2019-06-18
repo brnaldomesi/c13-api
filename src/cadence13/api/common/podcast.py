@@ -10,6 +10,9 @@ PODCASTS_LIMIT = 25
 def get_podcasts(start_after=None, ending_before=None, limit=PODCASTS_LIMIT):
     title = None
     podcast_guid = start_after or ending_before
+    sort_order = 'asc'
+    page_size = limit + 1
+
     if podcast_guid:
         title = (db.session.query(Podcast.title)
                  .filter(Podcast.guid == podcast_guid)
@@ -21,18 +24,47 @@ def get_podcasts(start_after=None, ending_before=None, limit=PODCASTS_LIMIT):
         stmt = stmt.filter((Podcast.title, Podcast.guid) > (title, podcast_guid))
     elif ending_before and title:
         stmt = stmt.filter((Podcast.title, Podcast.guid) < (title, podcast_guid))
-    stmt = (stmt.order_by(Podcast.title.asc(), Podcast.guid.asc())
-            .limit(limit))
+        sort_order = 'desc'
+    stmt = (stmt.order_by(getattr(Podcast.title, sort_order)(),
+                          getattr(Podcast.guid, sort_order)())
+            .limit(page_size))
 
     podcasts = stmt.all()
     schema = PodcastSchema(many=True)
-    result = schema.dump(podcasts)
+    results = schema.dump(podcasts)
+    has_more = len(results) == page_size
+    if has_more:
+        del results[-1]
+
+    next_start_after = None
+    next_ending_before = None
+    if start_after:
+        if results:
+            next_ending_before = results[0]['guid']
+        if has_more:
+            next_start_after = results[-1]['guid']
+    elif ending_before:
+        if results:
+            next_start_after = results[0]['guid']
+        if has_more:
+            next_ending_before = results[-1]['guid']
+    elif has_more:
+        next_start_after = results[-1]['guid']
+
+    if 'desc' == sort_order and isinstance(results, list):
+        results.sort(key=lambda x: x['title'])
+
+    links = {}
+    if next_start_after:
+        links['next'] = '/podcasts?limit={}&startAfter={}'.format(limit, next_start_after)
+    if next_ending_before:
+        links['prev'] = '/podcasts?limit={}&endingBefore={}'.format(limit, next_ending_before)
+
     return {
-        'results': result,
-        'links': {
-            'next': '/podcasts?limit={}&startAfter={}'.format(limit, result[-1]['guid']),
-            'prev': '/podcasts?limit={}&endingBefore={}'.format(limit, result[0]['guid'])
-        }
+        'results': results,
+        'count': len(results),
+        'hasMore': has_more,
+        'links': links
     }
 
 
