@@ -4,13 +4,36 @@ from cadence13.api.util.db import db
 from cadence13.api.util.string import underscore_to_camelcase
 from cadence13.api.common.schema import PodcastSchema
 
+PODCASTS_LIMIT = 25
 
-def get_podcasts():
-    podcasts = (db.session.query(Podcast)
-                .filter_by(status=PodcastStatus.ACTIVE).all())
+
+def get_podcasts(start_after=None, ending_before=None, limit=PODCASTS_LIMIT):
+    title = None
+    podcast_guid = start_after or ending_before
+    if podcast_guid:
+        title = (db.session.query(Podcast.title)
+                 .filter(Podcast.guid == podcast_guid)
+                 .scalar())
+
+    stmt = (db.session.query(Podcast)
+            .filter(Podcast.status == PodcastStatus.ACTIVE))
+    if start_after and title:
+        stmt = stmt.filter((Podcast.title, Podcast.guid) > (title, podcast_guid))
+    elif ending_before and title:
+        stmt = stmt.filter((Podcast.title, Podcast.guid) < (title, podcast_guid))
+    stmt = (stmt.order_by(Podcast.title.asc(), Podcast.guid.asc())
+            .limit(limit))
+
+    podcasts = stmt.all()
     schema = PodcastSchema(many=True)
     result = schema.dump(podcasts)
-    return result
+    return {
+        'results': result,
+        'links': {
+            'next': '/podcasts?limit={}&startAfter={}'.format(limit, result[-1]['guid']),
+            'prev': '/podcasts?limit={}&endingBefore={}'.format(limit, result[0]['guid'])
+        }
+    }
 
 
 def get_podcast(podcast_guid):

@@ -63,13 +63,43 @@ paths:
       operationId: cadence13.api.showtime.podcast.get_podcasts
       tags:
         - podcasts
+      parameters:
+        - name: startAfter
+          in: query
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: endingBefore
+          in: query
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: limit
+          in: query
+          schema:
+            type: integer
       responses:
         200:
           description: A paged array of pets
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Podcast'
+                type: object
+                required:
+                  - results
+                  - links
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      next:
+                        type: string
+                        example: '/podcasts?startAfter=49cf2579-0167-46f8-a1ff-4912f2b8bbbc'
+                      prev:
+                        type: string
+                        example: '/podcasts?endingBefore=acf6611b-6c4f-4c4f-b6d0-40a38c8abdb9'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Podcast'
         default:
           description: unexpected error
           content:
@@ -587,27 +617,35 @@ components:
           $ref: '#/components/schemas/UUID'
         slug:
           type: string
+          nullable: true
         title:
           type: string
+          nullable: true
         subtitle:
           type: string
           nullable: true
         summary:
           type: string
+          nullable: true
         copyright:
           type: string
+          nullable: true
         author:
           type: string
+          nullable: true
         websiteUrl:
           type: string
+          nullable: true
         feedUrl:
           type: string
         imageUrls:
           $ref: '#/components/schemas/ImageUrls'
         ownerName:
           type: string
+          nullable: true
         ownerEmail:
           type: string
+          nullable: true
         podcastType:
           type: string
           enum:
