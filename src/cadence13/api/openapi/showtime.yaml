@@ -78,7 +78,7 @@ paths:
             type: integer
       responses:
         200:
-          description: A paged array of pets
+          description: A paged array of podcasts
           content:
             application/json:
               schema:
@@ -170,15 +170,54 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/UUID'
+        - name: startAfter
+          in: query
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: endingBefore
+          in: query
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
       responses:
         200:
-          description: A paged array of episodes
+          description: A paged array of pets
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: '#/components/schemas/Episode'
+                type: object
+                required:
+                  - results
+                  - count
+#                  - links
+                properties:
+#                  links:
+#                    type: object
+#                    properties:
+#                      next:
+#                        type: string
+#                        example: '/podcasts?startAfter=49cf2579-0167-46f8-a1ff-4912f2b8bbbc'
+#                      prev:
+#                        type: string
+#                        example: '/podcasts?endingBefore=acf6611b-6c4f-4c4f-b6d0-40a38c8abdb9'
+                  count:
+                    type: integer
+                  hasMore:
+                    type: boolean
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Episode'
         default:
           description: unexpected error
           content:
@@ -689,6 +728,13 @@ components:
               - subtitle
               - summary
               - image
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
 
     Episode:
       required:
@@ -696,39 +742,52 @@ components:
       properties:
         guid:
           $ref: "#/components/schemas/UUID"
-        season_no:
+        podcastGuid:
+          $ref: "#/components/schemas/UUID"
+        seasonNo:
           type: integer
           format: int32
-        episode_no:
+          nullable: true
+        episodeNo:
           type: integer
           format: int32
+          nullable: true
         title:
           type: string
+          nullable: true
         subtitle:
           type: string
+          nullable: true
         summary:
           type: string
+          nullable: true
         author:
           type: string
-        episode_type:
+          nullable: true
+        episodeType:
           type: string
-        image_url:
+        imageUrl:
           type: string
-        audio_url:
+          nullable: true
+        audioUrl:
           type: string
-        is_explicit:
+          nullable: true
+        isExplicit:
           type: boolean
-        published_at:
+          nullable: true
+        publishedAt:
           type: string
           format: date-time
+          nullable: true
         status:
           type: string
-        created_at:
+        createdAt:
           type: string
           format: date-time
-        updated_at:
+        updatedAt:
           type: string
           format: date-time
+          nullable: true
 
     Error:
       required:

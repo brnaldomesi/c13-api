@@ -8,7 +8,6 @@ logger = get_logger(__name__)
 
 def get_podcasts(startAfter=None, endingBefore=None,
                  limit=common_podcast.PODCASTS_LIMIT):
-    logger.info('{}, {}, {}'.format(startAfter, endingBefore, limit))
     return common_podcast.get_podcasts(
         startAfter, endingBefore, limit)
 
@@ -21,8 +20,16 @@ def update_podcast():
     return 'Not implemented', 501
 
 
-def get_episodes():
-    return 'Not implemented', 501
+def get_episodes(podcastGuid, startAfter=None, endingBefore=None,
+                 limit=common_podcast.EPISODES_LIMIT,
+                 sortOrder='desc'):
+    return common_podcast.get_episodes(
+        podcast_guid=podcastGuid,
+        start_after=startAfter,
+        ending_before=endingBefore,
+        limit=limit,
+        sort_order=sortOrder
+    )
 
 
 def assign_network():
