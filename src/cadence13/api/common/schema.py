@@ -20,3 +20,22 @@ class PodcastSchema(Schema):
     status = EnumField(db_enums.PodcastStatus)
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
+
+
+class EpisodeSchema(Schema):
+    guid = fields.UUID()
+    podcast_guid = fields.UUID(data_key='podcastGuid')
+    season_no = fields.Integer(data_key='seasonNo')
+    episode_no = fields.Integer(data_key='episodeNo')
+    title = fields.String()
+    subtitle = fields.String()
+    summary = fields.String()
+    author = fields.String()
+    episode_type = EnumField(db_enums.EpisodeType, data_key='episodeType')
+    image_url = fields.Url(data_key='imageUrl')
+    audio_url = fields.Url(data_key='audioUrl')
+    is_explicit = fields.Boolean(data_key='isExplicit')
+    published_at = fields.DateTime(data_key='publishedAt')
+    status = EnumField(db_enums.EpisodeStatus)
+    created_at = fields.DateTime(data_key='createdAt')
+    updated_at = fields.DateTime(data_key='updatedAt')

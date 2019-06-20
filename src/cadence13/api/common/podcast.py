@@ -1,10 +1,14 @@
-from cadence13.db.tables import Podcast, PodcastSocialMedia, PodcastSubscription
-from cadence13.db.enums import PodcastStatus
+import operator
+from cadence13.db.tables import (
+    Podcast, PodcastSocialMedia, PodcastSubscription,
+    EpisodeNew)
+from cadence13.db.enums import PodcastStatus, EpisodeStatus
 from cadence13.api.util.db import db
 from cadence13.api.util.string import underscore_to_camelcase
-from cadence13.api.common.schema import PodcastSchema
+from cadence13.api.common.schema import PodcastSchema, EpisodeSchema
 
 PODCASTS_LIMIT = 25
+EPISODES_LIMIT = 25
 
 
 def get_podcasts(start_after=None, ending_before=None, limit=PODCASTS_LIMIT):
@@ -102,6 +106,71 @@ def get_subscription_urls(podcast_guid):
 
 def get_image_urls(podcast_guid):
     return []
+
+
+def get_episodes(podcast_guid, start_after=None, ending_before=None,
+                 limit=EPISODES_LIMIT, sort_order='desc'):
+    published_at = None
+    episode_guid = start_after or ending_before
+    page_size = limit + 1
+    reverse_order = 'asc' if sort_order == 'desc' else 'desc'
+
+    if episode_guid:
+        published_at = (db.session.query(EpisodeNew.published_at)
+                        .filter(EpisodeNew.guid == episode_guid)
+                        .scalar())
+
+    columns = [
+        EpisodeNew.guid,
+        Podcast.guid.label('podcast_guid'),
+        EpisodeNew.season_no,
+        EpisodeNew.episode_no,
+        EpisodeNew.title,
+        EpisodeNew.subtitle,
+        EpisodeNew.summary,
+        EpisodeNew.author,
+        EpisodeNew.episode_type,
+        EpisodeNew.image_url,
+        EpisodeNew.audio_url,
+        EpisodeNew.is_explicit,
+        EpisodeNew.published_at,
+        EpisodeNew.status,
+        EpisodeNew.created_at,
+        EpisodeNew.updated_at
+    ]
+    stmt = (db.session.query(*columns)
+            .join(Podcast, EpisodeNew.podcast_id == Podcast.id)
+            .filter(Podcast.guid == podcast_guid)
+            .filter(EpisodeNew.status == EpisodeStatus.ACTIVE)
+            .filter(EpisodeNew.published_at != None))
+
+    query_sort_order = sort_order
+    if episode_guid and published_at:
+        if not start_after:
+            query_sort_order = reverse_order
+        compare = operator.lt if query_sort_order == 'desc' else operator.gt
+        stmt = stmt.filter(compare((EpisodeNew.published_at, EpisodeNew.guid),
+                           (published_at, episode_guid)))
+
+    stmt = (stmt.order_by(getattr(EpisodeNew.published_at, query_sort_order)(),
+                          getattr(EpisodeNew.guid, query_sort_order)())
+            .limit(page_size))
+
+    episodes = stmt.all()
+    schema = EpisodeSchema(many=True)
+    results = schema.dump(episodes)
+    has_more = len(results) == page_size
+    if has_more:
+        del results[-1]
+
+    if query_sort_order != sort_order and isinstance(results, list):
+        results.reverse()
+
+    return {
+        'results': results,
+        'count': len(results),
+        'hasMore': has_more
+    }
 
 
 # def get_crew_members(podcast_guid):
