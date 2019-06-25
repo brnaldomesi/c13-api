@@ -3,7 +3,7 @@ from cadence13.db.tables import Network, Podcast, NetworkSeriesMap
 from cadence13.db.enums import PodcastStatus
 from cadence13.api.util.db import db
 from cadence13.api.util.string import underscore_to_camelcase
-from cadence13.api.common.schema import PodcastSchema
+from cadence13.api.common.schema.db import PodcastSchema
 
 
 class NetworkSchema(Schema):

@@ -1,40 +1,14 @@
-from typing import List
 import operator
-from marshmallow import Schema, fields, post_dump, pre_dump
 from cadence13.db.tables import (
     Podcast, PodcastConfig, PodcastSocialMedia,
     PodcastSubscription, EpisodeNew)
 from cadence13.db.enums import PodcastStatus, EpisodeStatus
 from cadence13.api.util.db import db
 from cadence13.api.util.string import underscore_to_camelcase
-from cadence13.api.common.schema import PodcastSchema, PodcastConfigSchema, EpisodeSchema
+from cadence13.api.common.schema.api import ApiPodcastSchema, ApiEpisodeSchema
 
 PODCASTS_LIMIT = 25
 EPISODES_LIMIT = 25
-
-
-class CustomPodcastSchema(Schema):
-    podcast = fields.Nested(PodcastSchema(), attribute='Podcast')
-    podcast_config = fields.Nested(PodcastConfigSchema(), attribute='PodcastConfig')
-
-    @pre_dump(pass_many=False)
-    def fill_missing_config(self, data, many, **kwargs):
-        if not data.PodcastConfig:
-            return {
-                'Podcast': data.Podcast,
-                'PodcastConfig': {
-                    'tags': [],
-                    'locked_sync_fields': []
-                }
-            }
-        return data
-
-    @post_dump(pass_many=False)
-    def merge_table(self, data, many, **kwargs):
-        podcast = data['podcast']
-        if data['podcast_config'] is not None:
-            podcast.update(data['podcast_config'])
-        return podcast
 
 
 def get_podcasts(start_after=None, ending_before=None, limit=PODCASTS_LIMIT):
@@ -61,7 +35,7 @@ def get_podcasts(start_after=None, ending_before=None, limit=PODCASTS_LIMIT):
             .limit(page_size))
 
     rows = stmt.all()
-    schema = CustomPodcastSchema(many=True)
+    schema = ApiPodcastSchema(many=True)
     results = schema.dump(rows)
 
     has_more = len(results) == page_size
@@ -109,71 +83,11 @@ def get_podcast(podcast_guid):
     if not row:
         return 'Not found', 404
 
-    schema = CustomPodcastSchema()
+    schema = ApiPodcastSchema()
     result = schema.dump(row)
     result['socialMedialUrls'] = get_social_media_urls(result['guid'])
     result['subscriptionUrls'] = get_subscription_urls(result['guid'])
     return result
-
-
-def update_podcast(podcast_guid, body: dict):
-    schema = PodcastSchema()
-    columns = schema.load(body)
-
-    #FIXME: check for schema validation errors
-
-    row = (db.session.query(Podcast)
-           .filter_by(guid=podcast_guid)
-           .one_or_none())
-
-    if not row:
-        return 'Not found', 404
-
-    for k, v in columns.items():
-        if hasattr(row, k):
-            setattr(row, k, v)
-
-    db.session.commit()
-    return get_podcast(podcast_guid)
-
-
-def _create_podcast_config(podcast_guid, params: dict):
-    select_stmt = (db.session.query(Podcast.id)
-                   .filter_by(guid=podcast_guid))
-    row = PodcastConfig(podcast_id=select_stmt)
-    for k, v in params.items():
-        if hasattr(row, k):
-            setattr(row, k, v)
-    db.session.add(row)
-    db.session.commit()
-
-    schema = PodcastConfigSchema()
-    return schema.dump(row)
-
-
-def _update_podcast_config(podcast_guid, params):
-    row = (db.session.query(PodcastConfig)
-           .join(Podcast, PodcastConfig.podcast_id == Podcast.id)
-           .filter(Podcast.guid == podcast_guid)
-           .one_or_none())
-
-    if not row:
-        return _create_podcast_config(podcast_guid, params)
-
-    for k, v in params.items():
-        if hasattr(row, k):
-            setattr(row, k, v)
-
-    schema = PodcastConfigSchema()
-    return schema.dump(row)
-
-
-def update_locked_sync_fields(podcast_guid, fields: List[str]):
-    normalized = frozenset([f.lower() for f in fields])
-    podcast_config = _update_podcast_config(podcast_guid, {
-        'locked_sync_fields': normalized
-    })
-    return podcast_config['locked_sync_fields']
 
 
 def get_social_media_urls(podcast_guid):
@@ -247,7 +161,7 @@ def get_episodes(podcast_guid, start_after=None, ending_before=None,
             .limit(page_size))
 
     episodes = stmt.all()
-    schema = EpisodeSchema(many=True)
+    schema = ApiEpisodeSchema(many=True)
     results = schema.dump(episodes)
     has_more = len(results) == page_size
     if has_more:

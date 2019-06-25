@@ -1,7 +1,11 @@
 from cadence13.api.util.logging import get_logger
-import cadence13.api.common.podcast as common_podcast
 import time
 import boto3
+from cadence13.api.util.db import db
+from cadence13.db.tables import Podcast, PodcastConfig
+import cadence13.api.common.podcast as common_podcast
+from cadence13.api.common.schema.db import PodcastConfigSchema
+from cadence13.api.common.schema.api import ApiPodcastSchema
 
 logger = get_logger(__name__)
 
@@ -17,7 +21,75 @@ def get_podcast(podcastGuid):
 
 
 def update_podcast(podcastGuid, body: dict):
-    return common_podcast.update_podcast(podcastGuid, body)
+    schema = ApiPodcastSchema()
+    deserialized = schema.load(body)
+    print(deserialized)
+
+    # FIXME: check for schema validation errors
+
+    if deserialized['PodcastConfig']:
+        _update_podcast_config(podcastGuid, deserialized['PodcastConfig'])
+
+    row = (db.session.query(Podcast)
+           .filter_by(guid=podcastGuid)
+           .one_or_none())
+
+    if not row:
+        return 'Not found', 404
+
+    for k, v in deserialized['Podcast'].items():
+        if hasattr(row, k):
+            setattr(row, k, v)
+
+    db.session.commit()
+    return get_podcast(podcastGuid)
+
+
+def _create_podcast_config(podcast_guid, params: dict):
+    select_stmt = (db.session.query(Podcast.id)
+                   .filter_by(guid=podcast_guid))
+    row = PodcastConfig(podcast_id=select_stmt)
+    for k, v in params.items():
+        if hasattr(row, k):
+            setattr(row, k, v)
+    db.session.add(row)
+    db.session.commit()
+
+    schema = PodcastConfigSchema()
+    return schema.dump(row)
+
+
+def _update_podcast_config(podcast_guid, params):
+    row = (db.session.query(PodcastConfig)
+           .join(Podcast, PodcastConfig.podcast_id == Podcast.id)
+           .filter(Podcast.guid == podcast_guid)
+           .one_or_none())
+
+    if not row:
+        return _create_podcast_config(podcast_guid, params)
+
+    for k, v in params.items():
+        if hasattr(row, k):
+            setattr(row, k, v)
+
+    schema = PodcastConfigSchema()
+    return schema.dump(row)
+
+
+def update_locked_sync_fields(podcastGuid, body):
+    normalized = frozenset([field.lower() for field in body])
+    podcast_config = _update_podcast_config(podcastGuid, {
+        'locked_sync_fields': normalized
+    })
+    return podcast_config['locked_sync_fields']
+
+
+def update_podcast_tags(podcastGuid, body):
+    normalized = frozenset([tag.lower() for tag in body])
+    podcast_config = _update_podcast_config(podcastGuid, {
+        'tags': normalized
+    })
+    return podcast_config['tags']
 
 
 def get_episodes(podcastGuid, startAfter=None, endingBefore=None,
