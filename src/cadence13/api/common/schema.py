@@ -22,6 +22,11 @@ class PodcastSchema(Schema):
     updated_at = fields.DateTime(data_key='updatedAt')
 
 
+class PodcastConfigSchema(Schema):
+    tags = fields.List(fields.String())
+    locked_sync_fields = fields.List(fields.String(), data_key='lockedSyncFields')
+
+
 class EpisodeSchema(Schema):
     guid = fields.UUID()
     podcast_guid = fields.UUID(data_key='podcastGuid')

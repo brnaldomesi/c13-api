@@ -16,8 +16,8 @@ def get_podcast(podcastGuid):
     return common_podcast.get_podcast(podcastGuid)
 
 
-def update_podcast():
-    return 'Not implemented', 501
+def update_podcast(podcastGuid, body: dict):
+    return common_podcast.update_podcast(podcastGuid, body)
 
 
 def get_episodes(podcastGuid, startAfter=None, endingBefore=None,

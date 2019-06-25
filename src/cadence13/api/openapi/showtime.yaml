@@ -148,7 +148,18 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/UUID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Podcast'
       responses:
+        200:
+          description: Return the updated podcast
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Podcast'
         default:
           description: unexpected error
           content:
@@ -714,11 +725,11 @@ components:
           type: array
           items:
             type: string
-        categories:
+        itunesCategories:
           type: array
           items:
             type: string
-        locked:
+        lockedSyncFields:
           type: array
           items:
             type: string

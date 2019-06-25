@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8945fff34b6125b34871b8545d6905791d41459b5e4768bfc4f8d78c7ae6fea2"
+            "sha256": "33dc72d3ddd11977e201682d57d04e28d44696f594658a839b3ce5633881b8f4"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -18,18 +18,18 @@
     "default": {
         "boto3": {
             "hashes": [
-                "sha256:58ae308e4539264754e4e2a21bfec71b2fbffe02e86a77e680077e10b7c0ed54",
-                "sha256:9d8bd0ca309b01265793b7e8d7b88c1df439737d77c8725988f0277bbf58d169"
+                "sha256:384bd3094e26d2273cbe755ee7ceb1d40e5e7f20dfb109b57e4887e00feadf73",
+                "sha256:401c2e609b7fc343d309e9fea148d535108b8a5d35760d720e94973f66ca08ec"
             ],
             "index": "pypi",
-            "version": "==1.9.169"
+            "version": "==1.9.175"
         },
         "botocore": {
             "hashes": [
-                "sha256:22e7d079b62562591bc5b00a4fa97e0626b6ffb1b605929c7b023171c33a548a",
-                "sha256:25b44c3253b5ed1c9093efb57ffca440c5099a2d62fa793e8b6c52e72f54b01e"
+                "sha256:2906736364fe5aaa5812a6eda5bef9b024ce8d7417a97b7eda76257ea11191f6",
+                "sha256:e7bc899e88d622088857337ce4adc65cf3c47c3b8c1a3c9cdbcfe5ffaca965a5"
             ],
-            "version": "==1.12.169"
+            "version": "==1.12.175"
         },
         "certifi": {
             "hashes": [
@@ -201,11 +201,11 @@
         },
         "marshmallow-sqlalchemy": {
             "hashes": [
-                "sha256:9b258becf07afa8499512bb35e37fbb54b625d6b70677165764996ba5a88e9f9",
-                "sha256:b795a672e568179633c97e8469310f16f999cf585677cd194dead13cd9ab876a"
+                "sha256:d662fc8103a06b59aafbc33c8ab4f1318799d66aae4f660c1e7e278bc45ef69e",
+                "sha256:f69e740ea8d3b678fd712263e5dd739c94482cd8840e2f6cf4314919e6547cee"
             ],
             "index": "pypi",
-            "version": "==0.16.4"
+            "version": "==0.17.0"
         },
         "openapi-spec-validator": {
             "hashes": [
@@ -296,17 +296,18 @@
         },
         "sqlalchemy": {
             "hashes": [
-                "sha256:c7fef198b43ef31dfd783d094fd5ee435ce8717592e6784c45ba337254998017"
+                "sha256:c30925d60af95443458ebd7525daf791f55762b106049ae71e18f8dd58084c2f"
             ],
             "index": "pypi",
-            "version": "==1.3.4"
+            "version": "==1.3.5"
         },
         "swagger-ui-bundle": {
             "hashes": [
-                "sha256:ca781a8e450996cd756020f70d1f1ac43c61d0e73882a9ff1f8d41e3be04856d",
-                "sha256:cea04fca6a37d26bfe0f0e3d78b51c023c30ba1105f7eaa5a709ed3725e570ea"
+                "sha256:01ae8fdb1fa4e034933e0874afdda0d433dcb94476fccb231b66fd5f49dac96c",
+                "sha256:802f160dd6fe1d6b8fa92c6a40f593ef52f87ad0f507b1170ad2067f03de4c01",
+                "sha256:e88bd0d8334d685440a85210ff1e1083a0caabd4c36fa061843067ff4c2ac680"
             ],
-            "version": "==0.0.4"
+            "version": "==0.0.5"
         },
         "urllib3": {
             "hashes": [
@@ -324,5 +325,28 @@
             "version": "==0.15.4"
         }
     },
-    "develop": {}
+    "develop": {
+        "inflect": {
+            "hashes": [
+                "sha256:4ded1b2a6fcf0fc0397419c7727f131a93b67b80d899f2973be7758628e12b73",
+                "sha256:a82b671b043ddba98ea8b2cf000b31e8b41e9197b3151567239f3bbe215dab7e"
+            ],
+            "version": "==2.1.0"
+        },
+        "sqlacodegen": {
+            "hashes": [
+                "sha256:160bbb269902607212a1e70ccc5374ceb41804e642c172cd230d88b974f620f5",
+                "sha256:1e73fe68d47c3e5717a919c873c29772f5689b069ecc53397da26a17ea94ce6d"
+            ],
+            "index": "pypi",
+            "version": "==2.0.1"
+        },
+        "sqlalchemy": {
+            "hashes": [
+                "sha256:c30925d60af95443458ebd7525daf791f55762b106049ae71e18f8dd58084c2f"
+            ],
+            "index": "pypi",
+            "version": "==1.3.5"
+        }
+    }
 }
