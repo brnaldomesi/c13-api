@@ -3,7 +3,7 @@ import time
 import boto3
 from cadence13.api.util.db import db
 from cadence13.db.tables import Podcast, PodcastConfig
-import cadence13.api.common.podcast as common_podcast
+import cadence13.api.common.controller.podcast as common_podcast
 from cadence13.api.common.schema.db import PodcastConfigSchema
 from cadence13.api.common.schema.api import ApiPodcastSchema
 
@@ -23,7 +23,6 @@ def get_podcast(podcastGuid):
 def update_podcast(podcastGuid, body: dict):
     schema = ApiPodcastSchema()
     deserialized = schema.load(body)
-    print(deserialized)
 
     # FIXME: check for schema validation errors
 

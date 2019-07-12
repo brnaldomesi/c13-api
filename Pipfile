@@ -18,6 +18,8 @@ boto3 = "*"
 marshmallow-enum = "*"
 psycopg2-binary = "*"
 flask-cors = "*"
+flask-jwt-extended = "*"
+flask-bcrypt = "*"
 
 [requires]
 python_version = "3.7"

@@ -4,10 +4,86 @@ info:
   title: Cadence13 Dashboard API
 
 paths:
+  /token:
+    delete:
+      summary: Logout and blacklist any non-expired tokens
+      operationId: token.logout
+      tags:
+        - token
+      responses:
+        200:
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  logout:
+                    type: boolean
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /token/auth:
+    post:
+      summary: Login and create a JWT access and refresh token
+      operationId: token.login
+      tags:
+        - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  access_csrf:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /token/refresh:
+    post:
+      summary: Refresh a JWT access token using the fresh token
+      operationId: token.refresh
+      tags:
+        - token
+      responses:
+        200:
+          description: Token successfully refreshed
+          content:
+            application/json:
+              schema:
+                properties:
+                  access_csrf:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /networks:
     get:
       summary: List all authorized networks
-      operationId: cadence13.api.showtime.network.get_networks
+      operationId: network.get_networks
       tags:
         - networks
       responses:
@@ -25,7 +101,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     post:
       summary: Create a new network
-      operationId: cadence13.api.showtime.network.create_network
+      operationId: network.create_network
       tags:
         - networks
       responses:
@@ -39,7 +115,7 @@ paths:
   /networks/{networkGuid}/podcasts:
     get:
       summary: List all podcasts in a network
-      operationId: cadence13.api.showtime.network.get_podcasts
+      operationId: network.get_podcasts
       tags:
         - networks
         - podcasts
@@ -60,7 +136,7 @@ paths:
   /podcasts:
     get:
       summary: List all authorized podcasts
-      operationId: cadence13.api.showtime.podcast.get_podcasts
+      operationId: podcast.get_podcasts
       tags:
         - podcasts
       parameters:
@@ -114,7 +190,7 @@ paths:
   /podcasts/{podcastGuid}:
     get:
       summary: Gets a podcast
-      operationId: cadence13.api.showtime.podcast.get_podcast
+      operationId: podcast.get_podcast
       tags:
         - podcasts
       parameters:
@@ -139,7 +215,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     patch:
       summary: Update an existing podcast
-      operationId: cadence13.api.showtime.podcast.update_podcast
+      operationId: podcast.update_podcast
       tags:
         - podcasts
       parameters:
@@ -171,7 +247,7 @@ paths:
   /podcasts/{podcastGuid}/episodes:
     get:
       summary: List all episodes in a podcast
-      operationId: cadence13.api.showtime.podcast.get_episodes
+      operationId: podcast.get_episodes
       tags:
         - podcasts
         - episodes
@@ -238,7 +314,7 @@ paths:
 
   /podcasts/{podcastGuid}/subscription-urls:
     get:
-      operationId: cadence13.api.showtime.podcast.get_subscription_urls
+      operationId: podcast.get_subscription_urls
       tags:
         - podcasts
       parameters:
@@ -261,7 +337,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     patch:
-      operationId: cadence13.api.showtime.podcast.patch_subscription_urls
+      operationId: podcast.patch_subscription_urls
       tags:
         - podcasts
       parameters:
@@ -291,7 +367,7 @@ paths:
 
   /podcasts/{podcastGuid}/social-media-urls:
     get:
-      operationId: cadence13.api.showtime.podcast.get_social_media_urls
+      operationId: podcast.get_social_media_urls
       tags:
         - podcasts
       parameters:
@@ -314,7 +390,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     patch:
-      operationId: cadence13.api.showtime.podcast.patch_social_media_urls
+      operationId: podcast.patch_social_media_urls
       tags:
         - podcasts
       parameters:
@@ -345,7 +421,7 @@ paths:
   /podcasts/{podcastGuid}/crew-members:
     get:
       summary: Get a list of crew members associated with the podcast
-      operationId: cadence13.api.showtime.podcast.get_crew_members
+      operationId: podcast.get_crew_members
       tags:
         - podcasts
         - crew
@@ -366,7 +442,7 @@ paths:
                   $ref: '#/components/schemas/CrewMember'
 
     post:
-      operationId: cadence13.api.showtime.crew.create_crew_member
+      operationId: crew.create_crew_member
       tags:
         - podcasts
         - crew
@@ -387,7 +463,7 @@ paths:
   /podcasts/{podcastGuid}/image-upload-url:
     post:
       summary: Generate a pre-signed URL to where an image will be uploaded
-      operationId: cadence13.api.showtime.podcast.create_image_upload_url
+      operationId: podcast.create_image_upload_url
       tags:
         - podcasts
       parameters:
@@ -414,7 +490,7 @@ paths:
   /episodes/{episodeGuid}:
     patch:
       summary: Update an existing episode
-      operationId: cadence13.api.showtime.episode.update_episode
+      operationId: episode.update_episode
       tags:
         - episodes
       parameters:
@@ -434,7 +510,7 @@ paths:
   /crew-members/{crewMemberGuid}:
     get:
       summary: Get crew member details
-      operationId: cadence13.api.showtime.crew.get_crew_member
+      operationId: crew.get_crew_member
       tags:
         - crew
       parameters:
@@ -459,7 +535,7 @@ paths:
 
     patch:
       summary: Update crew member details
-      operationId: cadence13.api.showtime.crew.patch_crew_member
+      operationId: crew.patch_crew_member
       tags:
         - crew
       parameters:
@@ -478,7 +554,7 @@ paths:
 
     delete:
       summary: Delete crew member
-      operationId: cadence13.api.showtime.crew.delete_crew_member
+      operationId: crew.delete_crew_member
       tags:
         - crew
       parameters:
@@ -499,7 +575,7 @@ paths:
   /crew-members/{crewMemberGuid}/image-upload-url:
     post:
       summary: Generate a pre-signed URL to where an image will be uploaded
-      operationId: cadence13.api.showtime.crew.create_image_upload_url
+      operationId: crew.create_image_upload_url
       tags:
         - crew
       parameters:
@@ -522,6 +598,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /test:
+    post:
+      summary: Perform a POST against a JWT protected URL
+      operationId: test.test_post
+      tags:
+        - token
+      responses:
+        200:
+          description: Test passed
+          content:
+            application/json:
+              schema:
+                properties:
+                  hello:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: Perform a GET against a JWT protected URL
+      operationId: test.test_get
+      tags:
+        - networks
+      responses:
+        200:
+          description: Test passed
+          content:
+            application/json:
+              schema:
+                properties:
+                  hello:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:

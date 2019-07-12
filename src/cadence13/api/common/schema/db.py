@@ -17,13 +17,14 @@ class PodcastSchema(Schema):
     owner_email = fields.Email(data_key='ownerEmail')
     is_explicit = fields.Boolean(data_key='isExplicit')
     is_complete = fields.Boolean(data_key='isComplete')
+    tags = fields.List(fields.String())
+    itunes_categories = fields.List(fields.Integer(), data_key='itunesCategories')
     status = EnumField(db_enums.PodcastStatus)
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
 
 
 class PodcastConfigSchema(Schema):
-    tags = fields.List(fields.String())
     locked_sync_fields = fields.List(fields.String(), data_key='lockedSyncFields')
 
 

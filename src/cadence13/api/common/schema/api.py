@@ -10,7 +10,7 @@ class ApiPodcastSchema(Schema):
     def split_to_db(self, data, many, **kwargs):
         podcast = data
         podcast_config = {}
-        for key in ('tags', 'lockedSyncFields'):
+        for key in ('lockedSyncFields',):
             if key not in podcast:
                 continue
             podcast_config[key] = podcast[key]
@@ -26,7 +26,6 @@ class ApiPodcastSchema(Schema):
             return {
                 'Podcast': data.Podcast,
                 'PodcastConfig': {
-                    'tags': [],
                     'locked_sync_fields': []
                 }
             }
