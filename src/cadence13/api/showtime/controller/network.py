@@ -1,8 +1,8 @@
 from marshmallow import Schema, fields
+from flask_jwt_extended import jwt_required
 from cadence13.db.tables import Network, Podcast, NetworkSeriesMap
 from cadence13.db.enums import PodcastStatus
 from cadence13.api.util.db import db
-from cadence13.api.util.string import underscore_to_camelcase
 from cadence13.api.common.schema.db import PodcastSchema
 
 
@@ -12,6 +12,7 @@ class NetworkSchema(Schema):
     name = fields.String()
 
 
+@jwt_required
 def get_networks():
     networks = (db.session.query(Network)
                 .filter_by(status='ACTIVE').all())
@@ -20,10 +21,12 @@ def get_networks():
     return result
 
 
+@jwt_required
 def create_network():
     return 'Not implemented', 501
 
 
+@jwt_required
 def get_podcasts(networkGuid):
     podcasts = (db.session.query(Podcast)
                 .join(NetworkSeriesMap, NetworkSeriesMap.series_id == Podcast.series_id)

@@ -19,7 +19,8 @@ marshmallow-enum = "*"
 psycopg2-binary = "*"
 flask-cors = "*"
 flask-jwt-extended = "*"
-flask-bcrypt = "*"
+argon2-cffi = "*"
+msgpack = "*"
 
 [requires]
 python_version = "3.7"

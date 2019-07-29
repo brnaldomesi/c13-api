@@ -1,6 +1,7 @@
 from cadence13.api.util.logging import get_logger
 import time
 import boto3
+from flask_jwt_extended import jwt_required
 from cadence13.api.util.db import db
 from cadence13.db.tables import Podcast, PodcastConfig
 import cadence13.api.common.controller.podcast as common_podcast
@@ -10,16 +11,21 @@ from cadence13.api.common.schema.api import ApiPodcastSchema
 logger = get_logger(__name__)
 
 
-def get_podcasts(startAfter=None, endingBefore=None,
-                 limit=common_podcast.PODCASTS_LIMIT):
+@jwt_required
+def get_podcasts(limit=None, sortOrder=None, nextCursor=None, prevCursor=None):
     return common_podcast.get_podcasts(
-        startAfter, endingBefore, limit)
+        limit=limit,
+        sort_order=sortOrder,
+        next_cursor=nextCursor,
+        prev_cursor=prevCursor)
 
 
+@jwt_required
 def get_podcast(podcastGuid):
     return common_podcast.get_podcast(podcastGuid)
 
 
+@jwt_required
 def update_podcast(podcastGuid, body: dict):
     schema = ApiPodcastSchema()
     deserialized = schema.load(body)
@@ -75,6 +81,7 @@ def _update_podcast_config(podcast_guid, params):
     return schema.dump(row)
 
 
+@jwt_required
 def update_locked_sync_fields(podcastGuid, body):
     normalized = frozenset([field.lower() for field in body])
     podcast_config = _update_podcast_config(podcastGuid, {
@@ -83,6 +90,7 @@ def update_locked_sync_fields(podcastGuid, body):
     return podcast_config['locked_sync_fields']
 
 
+@jwt_required
 def update_podcast_tags(podcastGuid, body):
     normalized = frozenset([tag.lower() for tag in body])
     podcast_config = _update_podcast_config(podcastGuid, {
@@ -91,22 +99,24 @@ def update_podcast_tags(podcastGuid, body):
     return podcast_config['tags']
 
 
-def get_episodes(podcastGuid, startAfter=None, endingBefore=None,
-                 limit=common_podcast.EPISODES_LIMIT,
-                 sortOrder='desc'):
+@jwt_required
+def get_episodes(podcastGuid, limit=None, sortOrder=None,
+                 nextCursor=None, prevCursor=None):
     return common_podcast.get_episodes(
         podcast_guid=podcastGuid,
-        start_after=startAfter,
-        ending_before=endingBefore,
         limit=limit,
-        sort_order=sortOrder
+        sort_order=sortOrder,
+        next_cursor=nextCursor,
+        prev_cursor=prevCursor
     )
 
 
+@jwt_required
 def assign_network():
     return 'Not implemented', 501
 
 
+@jwt_required
 def get_subscription_urls(podcastGuid):
     return {
         'applePodcasts': 'https://itunes.apple.com/podcast/id1192761536',
@@ -122,6 +132,7 @@ def get_subscription_urls(podcastGuid):
     }
 
 
+@jwt_required
 def patch_subscription_urls(podcastGuid, body):
     response = {
         'applePodcasts': 'https://itunes.apple.com/podcast/id1192761536',
@@ -141,6 +152,7 @@ def patch_subscription_urls(podcastGuid, body):
     return response
 
 
+@jwt_required
 def get_social_media_urls(podcastGuid):
     return {
         'facebook': 'https://www.facebook.com/podsaveamerica/',
@@ -154,6 +166,7 @@ def get_social_media_urls(podcastGuid):
     }
 
 
+@jwt_required
 def patch_social_media_urls(podcastGuid, body):
     response = {
         'facebook': 'https://www.facebook.com/podsaveamerica/',
@@ -171,6 +184,7 @@ def patch_social_media_urls(podcastGuid, body):
     return response
 
 
+@jwt_required
 def get_crew_members(podcastGuid):
     return [
         {
@@ -204,6 +218,7 @@ def get_crew_members(podcastGuid):
     ]
 
 
+@jwt_required
 def create_image_upload_url(podcastGuid):
     # s3 = boto3.client('s3',
     #   aws_access_key_id='',

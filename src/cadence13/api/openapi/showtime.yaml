@@ -140,18 +140,25 @@ paths:
       tags:
         - podcasts
       parameters:
-        - name: startAfter
-          in: query
-          schema:
-            $ref: '#/components/schemas/UUID'
-        - name: endingBefore
-          in: query
-          schema:
-            $ref: '#/components/schemas/UUID'
         - name: limit
           in: query
           schema:
             type: integer
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: nextCursor
+          in: query
+          schema:
+            type: string
+        - name: prevCursor
+          in: query
+          schema:
+            type: string
       responses:
         200:
           description: A paged array of podcasts
@@ -160,23 +167,20 @@ paths:
               schema:
                 type: object
                 required:
-                  - results
-                  - links
+                  - count
+                  - nextCursor
+                  - prevCursor
+                  - data
                 properties:
-                  links:
-                    type: object
-                    properties:
-                      next:
-                        type: string
-                        example: '/podcasts?startAfter=49cf2579-0167-46f8-a1ff-4912f2b8bbbc'
-                      prev:
-                        type: string
-                        example: '/podcasts?endingBefore=acf6611b-6c4f-4c4f-b6d0-40a38c8abdb9'
                   count:
                     type: integer
-                  hasMore:
-                    type: boolean
-                  results:
+                  nextCursor:
+                    type: string
+                    nullable: true
+                  prevCursor:
+                    type: string
+                    nullable: true
+                  data:
                     type: array
                     items:
                       $ref: '#/components/schemas/Podcast'
@@ -257,14 +261,6 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/UUID'
-        - name: startAfter
-          in: query
-          schema:
-            $ref: '#/components/schemas/UUID'
-        - name: endingBefore
-          in: query
-          schema:
-            $ref: '#/components/schemas/UUID'
         - name: limit
           in: query
           schema:
@@ -276,6 +272,14 @@ paths:
             enum:
               - asc
               - desc
+        - name: nextCursor
+          in: query
+          schema:
+            type: string
+        - name: prevCursor
+          in: query
+          schema:
+            type: string
       responses:
         200:
           description: A paged array of pets
@@ -284,24 +288,20 @@ paths:
               schema:
                 type: object
                 required:
-                  - results
                   - count
-#                  - links
+                  - nextCursor
+                  - prevCursor
+                  - data
                 properties:
-#                  links:
-#                    type: object
-#                    properties:
-#                      next:
-#                        type: string
-#                        example: '/podcasts?startAfter=49cf2579-0167-46f8-a1ff-4912f2b8bbbc'
-#                      prev:
-#                        type: string
-#                        example: '/podcasts?endingBefore=acf6611b-6c4f-4c4f-b6d0-40a38c8abdb9'
                   count:
                     type: integer
-                  hasMore:
-                    type: boolean
-                  results:
+                  nextCursor:
+                    type: string
+                    nullable: true
+                  prevCursor:
+                    type: string
+                    nullable: true
+                  data:
                     type: array
                     items:
                       $ref: '#/components/schemas/Episode'

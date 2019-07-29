@@ -1,3 +1,7 @@
+from cadence13.api.util.logging import get_logger
+import msgpack
+import enum
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 import operator
 from cadence13.db.tables import (
     Podcast, PodcastConfig, PodcastSocialMedia,
@@ -7,70 +11,110 @@ from cadence13.api.util.db import db
 from cadence13.api.util.string import underscore_to_camelcase
 from cadence13.api.common.schema.api import ApiPodcastSchema, ApiEpisodeSchema
 
-PODCASTS_LIMIT = 25
-EPISODES_LIMIT = 25
+logger = get_logger(__name__)
+
+PODCASTS_DEFAULT_LIMIT = 25
+PODCASTS_MAX_LIMIT = 25
+EPISODES_DEFAULT_LIMIT = 25
+EPISODES_MAX_LIMIT = 100
+EPISODE_COLUMNS = [
+    EpisodeNew.guid,
+    Podcast.guid.label('podcast_guid'),
+    EpisodeNew.season_no,
+    EpisodeNew.episode_no,
+    EpisodeNew.title,
+    EpisodeNew.subtitle,
+    EpisodeNew.summary,
+    EpisodeNew.author,
+    EpisodeNew.episode_type,
+    EpisodeNew.image_url,
+    EpisodeNew.audio_url,
+    EpisodeNew.is_explicit,
+    EpisodeNew.published_at,
+    EpisodeNew.status,
+    EpisodeNew.created_at,
+    EpisodeNew.updated_at
+]
+
+class SortOrder(enum.Enum):
+    DESC: str = 'desc'
+    ASC: str = 'asc'
 
 
-def get_podcasts(start_after=None, ending_before=None, limit=PODCASTS_LIMIT):
-    title = None
-    podcast_guid = start_after or ending_before
-    sort_order = 'asc'
-    page_size = limit + 1
+class PageDirection(enum.Enum):
+    FORWARD = enum.auto()
+    BACKWARD = enum.auto()
 
-    if podcast_guid:
-        title = (db.session.query(Podcast.title)
-                 .filter(Podcast.guid == podcast_guid)
-                 .scalar())
 
+def _encode_podcast_cursor(result_row):
+    payload = {
+        'title': result_row['title'],
+        'guid': result_row['guid']
+    }
+    packed = msgpack.packb(payload, use_bin_type=True)
+    return urlsafe_b64encode(packed).decode('ascii')
+
+
+def get_podcasts(limit=None, sort_order=None, next_cursor=None, prev_cursor=None):
+    limit = limit if limit else EPISODES_DEFAULT_LIMIT
+    cursor = next_cursor or prev_cursor
+    page_direction = (PageDirection.FORWARD if not cursor or next_cursor
+                      else PageDirection.BACKWARD)
+    sort_order = SortOrder[sort_order.upper()] if sort_order else SortOrder.ASC
+    reverse_order = (SortOrder.ASC if sort_order is SortOrder.DESC
+                     else SortOrder.DESC)
+
+    # Base query never changes
     stmt = (db.session.query(Podcast, PodcastConfig)
             .outerjoin(PodcastConfig, Podcast.id == PodcastConfig.podcast_id)
             .filter(Podcast.status == PodcastStatus.ACTIVE))
-    if start_after and title:
-        stmt = stmt.filter((Podcast.title, Podcast.guid) > (title, podcast_guid))
-    elif ending_before and title:
-        stmt = stmt.filter((Podcast.title, Podcast.guid) < (title, podcast_guid))
-        sort_order = 'desc'
-    stmt = (stmt.order_by(getattr(Podcast.title, sort_order)(),
-                          getattr(Podcast.guid, sort_order)())
-            .limit(page_size))
 
+    # Assume this is the first page and use default sort order
+    query_order = sort_order
+    if cursor:
+        cursor = _decode_cursor(cursor)
+        # If we're paging backwards, we need to search backwards
+        if prev_cursor:
+            query_order = reverse_order
+        compare_func = operator.lt if query_order is SortOrder.DESC else operator.gt
+        compare_cols = (Podcast.title, Podcast.guid)
+        compare_vals = (cursor['title'], cursor['guid'])
+        stmt = stmt.filter(compare_func(compare_cols, compare_vals))
+
+    # Figure out whether to call desc() or asc() on the fly
+    stmt = (stmt.order_by(getattr(Podcast.title, query_order.name.lower())(),
+                          getattr(Podcast.guid, query_order.name.lower())()))
+
+    # Fetch an extra row to see if there's more to get
+    query_limit = limit + 1
+    stmt = stmt.limit(query_limit)
+
+    # Finally perform the query
     rows = stmt.all()
+    has_more = len(rows) == query_limit
+    if has_more:
+        del rows[-1]
+    if query_order != sort_order:
+        rows.reverse()
+
     schema = ApiPodcastSchema(many=True)
     results = schema.dump(rows)
 
-    has_more = len(results) == page_size
-    if has_more:
-        del results[-1]
+    has_next = prev_cursor or (page_direction is PageDirection.FORWARD and has_more)
+    has_prev = next_cursor or (page_direction is PageDirection.BACKWARD and has_more)
+    next_cursor = None
+    prev_cursor = None
 
-    next_start_after = None
-    next_ending_before = None
-    if start_after:
-        if results:
-            next_ending_before = results[0]['guid']
-        if has_more:
-            next_start_after = results[-1]['guid']
-    elif ending_before:
-        if results:
-            next_start_after = results[0]['guid']
-        if has_more:
-            next_ending_before = results[-1]['guid']
-    elif has_more:
-        next_start_after = results[-1]['guid']
-
-    if 'desc' == sort_order and isinstance(results, list):
-        results.sort(key=lambda x: x['title'])
-
-    links = {}
-    if next_start_after:
-        links['next'] = '/podcasts?limit={}&startAfter={}'.format(limit, next_start_after)
-    if next_ending_before:
-        links['prev'] = '/podcasts?limit={}&endingBefore={}'.format(limit, next_ending_before)
+    if has_next:
+        next_cursor = _encode_podcast_cursor(results[-1])
+    if has_prev:
+        prev_cursor = _encode_podcast_cursor(results[0])
 
     return {
-        'results': results,
+        'data': results,
         'count': len(results),
-        'hasMore': has_more,
-        'links': links
+        'nextCursor': next_cursor,
+        'prevCursor': prev_cursor
     }
 
 
@@ -112,68 +156,82 @@ def get_image_urls(podcast_guid):
     return []
 
 
-def get_episodes(podcast_guid, start_after=None, ending_before=None,
-                 limit=EPISODES_LIMIT, sort_order='desc'):
-    published_at = None
-    episode_guid = start_after or ending_before
-    page_size = limit + 1
-    reverse_order = 'asc' if sort_order == 'desc' else 'desc'
+def _decode_cursor(encoded_cursor):
+    return msgpack.unpackb(urlsafe_b64decode(encoded_cursor), raw=False)
 
-    if episode_guid:
-        published_at = (db.session.query(EpisodeNew.published_at)
-                        .filter(EpisodeNew.guid == episode_guid)
-                        .scalar())
 
-    columns = [
-        EpisodeNew.guid,
-        Podcast.guid.label('podcast_guid'),
-        EpisodeNew.season_no,
-        EpisodeNew.episode_no,
-        EpisodeNew.title,
-        EpisodeNew.subtitle,
-        EpisodeNew.summary,
-        EpisodeNew.author,
-        EpisodeNew.episode_type,
-        EpisodeNew.image_url,
-        EpisodeNew.audio_url,
-        EpisodeNew.is_explicit,
-        EpisodeNew.published_at,
-        EpisodeNew.status,
-        EpisodeNew.created_at,
-        EpisodeNew.updated_at
-    ]
-    stmt = (db.session.query(*columns)
+def _encode_episode_cursor(result_row):
+    payload = {
+        'published_at': result_row['publishedAt'],
+        'guid': result_row['guid']
+    }
+    packed = msgpack.packb(payload, use_bin_type=True)
+    return urlsafe_b64encode(packed).decode('ascii')
+
+
+def get_episodes(podcast_guid, limit=None, sort_order=None,
+                 next_cursor=None, prev_cursor=None):
+    limit = limit if limit else EPISODES_DEFAULT_LIMIT
+    cursor = next_cursor or prev_cursor
+    page_direction = (PageDirection.FORWARD if not cursor or next_cursor
+                      else PageDirection.BACKWARD)
+    sort_order = SortOrder[sort_order.upper()] if sort_order else SortOrder.DESC
+    reverse_order = (SortOrder.ASC if sort_order is SortOrder.DESC
+                     else SortOrder.DESC)
+
+    # Base query never changes
+    stmt = (db.session.query(*EPISODE_COLUMNS)
             .join(Podcast, EpisodeNew.podcast_id == Podcast.id)
             .filter(Podcast.guid == podcast_guid)
             .filter(EpisodeNew.status == EpisodeStatus.ACTIVE)
             .filter(EpisodeNew.published_at != None))
 
-    query_sort_order = sort_order
-    if episode_guid and published_at:
-        if not start_after:
-            query_sort_order = reverse_order
-        compare = operator.lt if query_sort_order == 'desc' else operator.gt
-        stmt = stmt.filter(compare((EpisodeNew.published_at, EpisodeNew.guid),
-                           (published_at, episode_guid)))
+    # Assume this is the first page and use default sort order
+    query_order = sort_order
+    if cursor:
+        cursor = _decode_cursor(cursor)
+        # If we're paging backwards, we need to search backwards
+        if prev_cursor:
+            query_order = reverse_order
+        compare_func = operator.lt if query_order is SortOrder.DESC else operator.gt
+        compare_cols = (EpisodeNew.published_at, EpisodeNew.guid)
+        compare_vals = (cursor['published_at'], cursor['guid'])
+        stmt = stmt.filter(compare_func(compare_cols, compare_vals))
 
-    stmt = (stmt.order_by(getattr(EpisodeNew.published_at, query_sort_order)(),
-                          getattr(EpisodeNew.guid, query_sort_order)())
-            .limit(page_size))
+    # Figure out whether to call desc() or asc() on the fly
+    stmt = (stmt.order_by(getattr(EpisodeNew.published_at, query_order.name.lower())(),
+                          getattr(EpisodeNew.guid, query_order.name.lower())()))
 
+    # Fetch an extra row to see if there's more to get
+    query_limit = limit + 1
+    stmt = stmt.limit(query_limit)
+
+    # Finally perform the query
     episodes = stmt.all()
+    has_more = len(episodes) == query_limit
+    if has_more:
+        del episodes[-1]
+    if query_order != sort_order:
+        episodes.reverse()
+
     schema = ApiEpisodeSchema(many=True)
     results = schema.dump(episodes)
-    has_more = len(results) == page_size
-    if has_more:
-        del results[-1]
 
-    if query_sort_order != sort_order and isinstance(results, list):
-        results.reverse()
+    has_next = prev_cursor or (page_direction is PageDirection.FORWARD and has_more)
+    has_prev = next_cursor or (page_direction is PageDirection.BACKWARD and has_more)
+    next_cursor = None
+    prev_cursor = None
+
+    if has_next:
+        next_cursor = _encode_episode_cursor(results[-1])
+    if has_prev:
+        prev_cursor = _encode_episode_cursor(results[0])
 
     return {
-        'results': results,
+        'data': results,
         'count': len(results),
-        'hasMore': has_more
+        'nextCursor': next_cursor,
+        'prevCursor': prev_cursor
     }
 
 

@@ -1,35 +1,22 @@
 version: '3.7'
 
-
 services:
-#  postgres:
-#    image: postgres:latest
-#    ports:
-#      - 5432:5432
-#    volumes:
-#      - postgres-data:/var/lib/postgresql/data
-#
-#  nginx:
-#    image: nginx:latest
-#    ports:
-#      - 80:80
-#    volumes:
-#      - ./nginx/podcast-api.conf:/etc/nginx/conf.d/podcast-api.conf
-#      - ./nginx/podcast-pages.conf:/etc/nginx/conf.d/podcast-pages.conf
-#    depends_on:
-#      - podcast-pages
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - ./conf/nginx/showtime-api.conf:/etc/nginx/conf.d/showtime-api.conf:ro
+    depends_on:
+      - showtime-api
 
   showtime-api:
     build: .
     command: "showtime"
-    ports:
-      - 8080:8080
     volumes:
+      - ./bin:/opt/cadence13/podcast-api/bin
       - ./src:/opt/cadence13/podcast-api/src
       - ./ext:/opt/cadence13/podcast-api/ext
       - ./conf:/opt/cadence13/podcast-api/conf
     environment:
       CONFIG_URL: 'file:///opt/cadence13/podcast-api/conf/config_dev.json'
-
-#volumes:
-#  postgres-data: {}
