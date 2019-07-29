@@ -21,6 +21,7 @@ flask-cors = "*"
 flask-jwt-extended = "*"
 argon2-cffi = "*"
 msgpack = "*"
+hashids = "*"
 
 [requires]
 python_version = "3.7"
