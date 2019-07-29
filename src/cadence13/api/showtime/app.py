@@ -1,11 +1,7 @@
 from cadence13.api.util.logging import get_logger
 import os.path
 import connexion
-from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token,
-    jwt_refresh_token_required, create_refresh_token,
-    get_jwt_identity, set_access_cookies,
-    set_refresh_cookies, unset_jwt_cookies)
+from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from cadence13.api.util.db import db
 from cadence13.api.util.config import config_manager
@@ -31,7 +27,13 @@ config = config_manager.get_config()
 app = rest_app.app
 
 # Configure CORS
-CORS(app)
+origins = [
+    'localhost',
+    'showtime.cadence13.com',
+    'showtime-test.cadence13.io',
+    'showtime-dev.cadence13.io'
+]
+CORS(app, origins=origins, supports_credentials=True, max_age=3600)
 
 # Configure the app with database settings
 app.config['SQLALCHEMY_DATABASE_URI'] = config['database_url']

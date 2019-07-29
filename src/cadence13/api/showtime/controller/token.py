@@ -5,19 +5,21 @@ from flask_jwt_extended import (
     get_jwt_identity, set_access_cookies, set_refresh_cookies,
     unset_jwt_cookies, jwt_refresh_token_required
 )
+from cadence13.api.showtime.model.user import is_password_valid
+from cadence13.api.util.db import db
 
 logger = get_logger(__name__)
 
 
 def login():
-    username = request.json.get('username', None)
+    email = request.json.get('email', None)
     password = request.json.get('password', None)
-    if username != 'test' or password != 'test':
-        return jsonify({'login': False}), 401
+    if not is_password_valid(db.session, email, password):
+        return 'Unauthorized', 401
 
     # Create the tokens we will be sending back to the user
-    access_token = create_access_token(identity=username)
-    refresh_token = create_refresh_token(identity=username)
+    access_token = create_access_token(identity=email)
+    refresh_token = create_refresh_token(identity=email)
 
     # Return the double submit values in the resulting JSON
     resp = jsonify({
