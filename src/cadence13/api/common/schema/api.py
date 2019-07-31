@@ -10,11 +10,13 @@ class ApiPodcastSchema(PodcastSchema):
     categories = fields.Nested(PodcastCategorySchema, many=True)
 
     @post_dump(pass_many=False)
-    def merge_table(self, data, many, **kwargs):
+    def post_dump(self, data, many, **kwargs):
         data['id'] = data['guid']
         data['lockedSyncFields'] = data.get('config', {}).get('lockedSyncFields', [])
         data['imageUrls'] = {'original': data['imageUrl']}
         del data['imageUrl']
+        if data.get('networkId'):
+            del data['networkId']
         return data
 
 
