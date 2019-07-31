@@ -5,7 +5,7 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 import operator
 from sqlalchemy.orm import relationship
 from cadence13.db.tables import (
-    Podcast, PodcastConfig, PodcastSocialMedia,
+    Podcast, PodcastConfig, PodcastSocialMedia, Network,
     PodcastSubscription, EpisodeNew, PodcastCategory, PodcastCategoryMap)
 from cadence13.db.enums import PodcastStatus, EpisodeStatus
 from cadence13.api.util.db import db
@@ -50,6 +50,7 @@ class PageDirection(enum.Enum):
 
 class ApiPodcast(Podcast):
     config = relationship(PodcastConfig)
+    network = relationship(Network)
     categories = relationship(
         PodcastCategory,
         secondary=PodcastCategoryMap.__table__,

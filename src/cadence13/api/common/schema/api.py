@@ -1,10 +1,12 @@
 from marshmallow import Schema, fields, pre_load, pre_dump, post_dump
-from cadence13.api.common.schema.db import (PodcastSchema, PodcastConfigSchema,
-                                            PodcastCategorySchema, EpisodeSchema)
+from cadence13.api.common.schema.db import (
+    PodcastSchema, PodcastConfigSchema, PodcastCategorySchema,
+    EpisodeSchema, NetworkSchema)
 
 
 class ApiPodcastSchema(PodcastSchema):
     config = fields.Nested(PodcastConfigSchema)
+    network = fields.Nested(NetworkSchema)
     categories = fields.Nested(PodcastCategorySchema, many=True)
 
     @post_dump(pass_many=False)

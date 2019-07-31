@@ -3,9 +3,13 @@ from marshmallow_enum import EnumField
 import cadence13.db.enums as db_enums
 
 
+class NetworkSchema(Schema):
+    id = fields.UUID()
+    name = fields.String()
+
+
 class PodcastSchema(Schema):
     guid = fields.UUID()
-    network_id = fields.UUID(data_key='networkId')
     slug = fields.String()
     title = fields.String()
     subtitle = fields.String()
@@ -23,6 +27,7 @@ class PodcastSchema(Schema):
     status = EnumField(db_enums.PodcastStatus)
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
+    network_id = fields.UUID(data_key='networkId')
 
 
 class PodcastConfigSchema(Schema):
