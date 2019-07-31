@@ -3,9 +3,10 @@ import msgpack
 import enum
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 import operator
+from sqlalchemy.orm import relationship
 from cadence13.db.tables import (
     Podcast, PodcastConfig, PodcastSocialMedia,
-    PodcastSubscription, EpisodeNew)
+    PodcastSubscription, EpisodeNew, PodcastCategory, PodcastCategoryMap)
 from cadence13.db.enums import PodcastStatus, EpisodeStatus
 from cadence13.api.util.db import db
 from cadence13.api.util.string import underscore_to_camelcase
@@ -36,6 +37,7 @@ EPISODE_COLUMNS = [
     EpisodeNew.updated_at
 ]
 
+
 class SortOrder(enum.Enum):
     DESC: str = 'desc'
     ASC: str = 'asc'
@@ -44,6 +46,15 @@ class SortOrder(enum.Enum):
 class PageDirection(enum.Enum):
     FORWARD = enum.auto()
     BACKWARD = enum.auto()
+
+
+class ApiPodcast(Podcast):
+    config = relationship(PodcastConfig)
+    categories = relationship(
+        PodcastCategory,
+        secondary=PodcastCategoryMap.__table__,
+        primaryjoin='ApiPodcast.guid == PodcastCategoryMap.podcast_id'
+    )
 
 
 def _encode_podcast_cursor(result_row):
@@ -65,9 +76,8 @@ def get_podcasts(limit=None, sort_order=None, next_cursor=None, prev_cursor=None
                      else SortOrder.DESC)
 
     # Base query never changes
-    stmt = (db.session.query(Podcast, PodcastConfig)
-            .outerjoin(PodcastConfig, Podcast.id == PodcastConfig.podcast_id)
-            .filter(Podcast.status == PodcastStatus.ACTIVE))
+    stmt = (db.session.query(ApiPodcast)
+            .filter(ApiPodcast.status == PodcastStatus.ACTIVE))
 
     # Assume this is the first page and use default sort order
     query_order = sort_order
@@ -77,13 +87,13 @@ def get_podcasts(limit=None, sort_order=None, next_cursor=None, prev_cursor=None
         if prev_cursor:
             query_order = reverse_order
         compare_func = operator.lt if query_order is SortOrder.DESC else operator.gt
-        compare_cols = (Podcast.title, Podcast.guid)
+        compare_cols = (ApiPodcast.title, ApiPodcast.guid)
         compare_vals = (cursor['title'], cursor['guid'])
         stmt = stmt.filter(compare_func(compare_cols, compare_vals))
 
     # Figure out whether to call desc() or asc() on the fly
-    stmt = (stmt.order_by(getattr(Podcast.title, query_order.name.lower())(),
-                          getattr(Podcast.guid, query_order.name.lower())()))
+    stmt = (stmt.order_by(getattr(ApiPodcast.title, query_order.name.lower())(),
+                          getattr(ApiPodcast.guid, query_order.name.lower())()))
 
     # Fetch an extra row to see if there's more to get
     query_limit = limit + 1
@@ -119,9 +129,8 @@ def get_podcasts(limit=None, sort_order=None, next_cursor=None, prev_cursor=None
 
 
 def get_podcast(podcast_guid):
-    row = (db.session.query(Podcast, PodcastConfig)
-           .outerjoin(PodcastConfig, Podcast.id == PodcastConfig.podcast_id)
-           .filter(Podcast.guid == podcast_guid)
+    row = (db.session.query(ApiPodcast)
+           .filter(ApiPodcast.guid == podcast_guid)
            .one_or_none())
 
     if not row:
