@@ -662,10 +662,10 @@ components:
 
     Network:
       required:
-        - guid
+        - id
         - name
       properties:
-        guid:
+        id:
           $ref: '#/components/schemas/UUID'
         name:
           type: string
@@ -871,6 +871,9 @@ components:
         updatedAt:
           type: string
           format: date-time
+          nullable: true
+        network:
+          $ref: '#/components/schemas/Network'
           nullable: true
 
     Episode:
