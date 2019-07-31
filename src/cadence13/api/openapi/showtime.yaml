@@ -782,6 +782,15 @@ components:
           items:
             type: string
 
+    PodcastCategory:
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        hash:
+          type: string
+        name:
+          type: string
+
     Podcast:
       properties:
         guid:
@@ -842,10 +851,10 @@ components:
           type: array
           items:
             type: string
-        itunesCategories:
+        categories:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/PodcastCategory'
         lockedSyncFields:
           type: array
           items:
