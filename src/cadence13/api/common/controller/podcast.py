@@ -49,8 +49,8 @@ class PageDirection(enum.Enum):
 
 
 class ApiPodcast(Podcast):
-    config = relationship(PodcastConfig)
-    network = relationship(Network)
+    config = relationship(PodcastConfig, uselist=False)
+    network = relationship(Network, uselist=False)
     categories = relationship(
         PodcastCategory,
         secondary=PodcastCategoryMap.__table__,
@@ -80,7 +80,13 @@ def get_podcasts(limit=None, sort_order=None, next_cursor=None, prev_cursor=None
     stmt = (db.session.query(ApiPodcast)
             .filter(ApiPodcast.status == PodcastStatus.ACTIVE))
 
-    # Assume this is the first page and use default sort order
+    # TODO: Add any filters
+
+    # Fetch total results before pagination and limits
+    total = stmt.count()
+
+    # Handle any pagination here. Assume this is
+    # the first page and use default sort order
     query_order = sort_order
     if cursor:
         cursor = _decode_cursor(cursor)
@@ -123,7 +129,7 @@ def get_podcasts(limit=None, sort_order=None, next_cursor=None, prev_cursor=None
 
     return {
         'data': results,
-        'count': len(results),
+        'total': total,
         'nextCursor': next_cursor,
         'prevCursor': prev_cursor
     }
