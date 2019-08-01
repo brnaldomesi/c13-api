@@ -21,33 +21,33 @@ def get_podcasts(limit=None, sortOrder=None, nextCursor=None, prevCursor=None):
 
 
 @jwt_required
-def get_podcast(podcastGuid):
-    return common_podcast.get_podcast(podcastGuid)
+def get_podcast(podcastId):
+    return common_podcast.get_podcast(podcastId)
 
 
 @jwt_required
-def update_podcast(podcastGuid, body: dict):
+def update_podcast(podcastId, body: dict):
     schema = ApiPodcastSchema()
     deserialized = schema.load(body)
-
+    logger.info(deserialized)
     # FIXME: check for schema validation errors
 
-    if deserialized['PodcastConfig']:
-        _update_podcast_config(podcastGuid, deserialized['PodcastConfig'])
+    if deserialized['config']:
+        _update_podcast_config(podcastId, deserialized['config'])
 
     row = (db.session.query(Podcast)
-           .filter_by(guid=podcastGuid)
+           .filter_by(guid=podcastId)
            .one_or_none())
 
     if not row:
         return 'Not found', 404
 
-    for k, v in deserialized['Podcast'].items():
+    for k, v in deserialized.items():
         if hasattr(row, k):
             setattr(row, k, v)
 
     db.session.commit()
-    return get_podcast(podcastGuid)
+    return get_podcast(podcastId)
 
 
 def _create_podcast_config(podcast_guid, params: dict):
@@ -65,16 +65,21 @@ def _create_podcast_config(podcast_guid, params: dict):
 
 
 def _update_podcast_config(podcast_guid, params):
+    logger.info(podcast_guid)
+    logger.info(params)
+
     row = (db.session.query(PodcastConfig)
            .join(Podcast, PodcastConfig.podcast_id == Podcast.id)
            .filter(Podcast.guid == podcast_guid)
            .one_or_none())
 
     if not row:
+        logger.info('creating config for {}'.format(podcast_guid))
         return _create_podcast_config(podcast_guid, params)
 
     for k, v in params.items():
         if hasattr(row, k):
+            logger.info('adding {} to update fields'.format(k))
             setattr(row, k, v)
 
     schema = PodcastConfigSchema()
@@ -82,28 +87,28 @@ def _update_podcast_config(podcast_guid, params):
 
 
 @jwt_required
-def update_locked_sync_fields(podcastGuid, body):
+def update_locked_sync_fields(podcastId, body):
     normalized = frozenset([field.lower() for field in body])
-    podcast_config = _update_podcast_config(podcastGuid, {
+    podcast_config = _update_podcast_config(podcastId, {
         'locked_sync_fields': normalized
     })
     return podcast_config['locked_sync_fields']
 
 
 @jwt_required
-def update_podcast_tags(podcastGuid, body):
+def update_podcast_tags(podcastId, body):
     normalized = frozenset([tag.lower() for tag in body])
-    podcast_config = _update_podcast_config(podcastGuid, {
+    podcast_config = _update_podcast_config(podcastId, {
         'tags': normalized
     })
     return podcast_config['tags']
 
 
 @jwt_required
-def get_episodes(podcastGuid, limit=None, sortOrder=None,
+def get_episodes(podcastId, limit=None, sortOrder=None,
                  nextCursor=None, prevCursor=None):
     return common_podcast.get_episodes(
-        podcast_guid=podcastGuid,
+        podcast_guid=podcastId,
         limit=limit,
         sort_order=sortOrder,
         next_cursor=nextCursor,
@@ -117,7 +122,7 @@ def assign_network():
 
 
 @jwt_required
-def get_subscription_urls(podcastGuid):
+def get_subscription_urls(podcastId):
     return {
         'applePodcasts': 'https://itunes.apple.com/podcast/id1192761536',
         'googlePlay': None,
@@ -133,7 +138,7 @@ def get_subscription_urls(podcastGuid):
 
 
 @jwt_required
-def patch_subscription_urls(podcastGuid, body):
+def patch_subscription_urls(podcastId, body):
     response = {
         'applePodcasts': 'https://itunes.apple.com/podcast/id1192761536',
         'googlePlay': None,
@@ -153,7 +158,7 @@ def patch_subscription_urls(podcastGuid, body):
 
 
 @jwt_required
-def get_social_media_urls(podcastGuid):
+def get_social_media_urls(podcastId):
     return {
         'facebook': 'https://www.facebook.com/podsaveamerica/',
         'instagram': None,
@@ -167,7 +172,7 @@ def get_social_media_urls(podcastGuid):
 
 
 @jwt_required
-def patch_social_media_urls(podcastGuid, body):
+def patch_social_media_urls(podcastId, body):
     response = {
         'facebook': 'https://www.facebook.com/podsaveamerica/',
         'instagram': None,
@@ -185,11 +190,11 @@ def patch_social_media_urls(podcastGuid, body):
 
 
 @jwt_required
-def get_crew_members(podcastGuid):
+def get_crew_members(podcastId):
     return [
         {
             'guid': 'd858bc53-9c3b-4bb8-a163-c58df7800121',
-            'podcastGuid': podcastGuid,
+            'podcastId': podcastId,
             'firstName': 'Jon',
             'middleName': None,
             'lastName': 'Favreau',
@@ -199,7 +204,7 @@ def get_crew_members(podcastGuid):
         },
         {
             'guid': '4ca17120-86d4-4474-bd5e-3e5d4d521947',
-            'podcastGuid': podcastGuid,
+            'podcastId': podcastId,
             'firstName': 'Jon',
             'middleName': None,
             'lastName': 'Lovett',
@@ -209,7 +214,7 @@ def get_crew_members(podcastGuid):
         },
         {
             'guid': '6f93d51f-ac2a-4159-9430-1337e0324425',
-            'podcastGuid': podcastGuid,
+            'podcastId': podcastId,
             'firstName': 'Dan',
             'middleName': None,
             'lastName': 'Pfeiffer',
@@ -219,13 +224,13 @@ def get_crew_members(podcastGuid):
 
 
 @jwt_required
-def create_image_upload_url(podcastGuid):
+def create_image_upload_url(podcastId):
     # s3 = boto3.client('s3',
     #   aws_access_key_id='',
     #   aws_secret_access_key=''
     # )
     s3 = boto3.client('s3')
-    key = 'podcasts/{}/{}/original.jpg'.format(podcastGuid, int(time.time()))
+    key = 'podcasts/{}/{}/original.jpg'.format(podcastId, int(time.time()))
     return s3.generate_presigned_post(
         Bucket='cadence13-showtime-upload-test',
         Key=key,

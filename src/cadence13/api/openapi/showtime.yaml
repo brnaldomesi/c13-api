@@ -92,7 +92,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Network'
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Network'
+
         default:
           description: unexpected error
           content:
@@ -112,7 +123,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /networks/{networkGuid}/podcasts:
+  /networks/{networkId}/podcasts:
     get:
       summary: List all podcasts in a network
       operationId: network.get_podcasts
@@ -120,7 +131,7 @@ paths:
         - networks
         - podcasts
       parameters:
-        - name: networkGuid
+        - name: networkId
           in: path
           required: true
           schema:
@@ -167,7 +178,7 @@ paths:
               schema:
                 type: object
                 required:
-                  - count
+                  - total
                   - nextCursor
                   - prevCursor
                   - data
@@ -191,14 +202,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /podcasts/{podcastGuid}:
+  /podcasts/{podcastId}:
     get:
       summary: Gets a podcast
       operationId: podcast.get_podcast
       tags:
         - podcasts
       parameters:
-        - name: podcastGuid
+        - name: podcastId
           in: path
           required: true
           schema:
@@ -223,7 +234,7 @@ paths:
       tags:
         - podcasts
       parameters:
-        - name: podcastGuid
+        - name: podcastId
           in: path
           required: true
           schema:
@@ -248,7 +259,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 
-  /podcasts/{podcastGuid}/episodes:
+  /podcasts/{podcastId}/episodes:
     get:
       summary: List all episodes in a podcast
       operationId: podcast.get_episodes
@@ -256,7 +267,7 @@ paths:
         - podcasts
         - episodes
       parameters:
-        - name: podcastGuid
+        - name: podcastId
           in: path
           required: true
           schema:
@@ -312,13 +323,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /podcasts/{podcastGuid}/subscription-urls:
+  /podcasts/{podcastId}/subscription-urls:
     get:
       operationId: podcast.get_subscription_urls
       tags:
         - podcasts
       parameters:
-        - name: podcastGuid
+        - name: podcastId
           in: path
           required: true
           schema:
@@ -341,7 +352,7 @@ paths:
       tags:
         - podcasts
       parameters:
-        - name: podcastGuid
+        - name: podcastId
           in: path
           required: true
           schema:
@@ -365,13 +376,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /podcasts/{podcastGuid}/social-media-urls:
+  /podcasts/{podcastId}/social-media-urls:
     get:
       operationId: podcast.get_social_media_urls
       tags:
         - podcasts
       parameters:
-        - name: podcastGuid
+        - name: podcastId
           in: path
           required: true
           schema:
@@ -394,7 +405,7 @@ paths:
       tags:
         - podcasts
       parameters:
-        - name: podcastGuid
+        - name: podcastId
           in: path
           required: true
           schema:
@@ -418,7 +429,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /podcasts/{podcastGuid}/crew-members:
+  /podcasts/{podcastId}/crew-members:
     get:
       summary: Get a list of crew members associated with the podcast
       operationId: podcast.get_crew_members
@@ -426,7 +437,7 @@ paths:
         - podcasts
         - crew
       parameters:
-        - name: podcastGuid
+        - name: podcastId
           in: path
           required: true
           schema:
@@ -447,7 +458,7 @@ paths:
         - podcasts
         - crew
       parameters:
-        - name: podcastGuid
+        - name: podcastId
           in: path
           required: true
           schema:
@@ -460,14 +471,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /podcasts/{podcastGuid}/image-upload-url:
+  /podcasts/{podcastId}/image-upload-url:
     post:
       summary: Generate a pre-signed URL to where an image will be uploaded
       operationId: podcast.create_image_upload_url
       tags:
         - podcasts
       parameters:
-        - name: podcastGuid
+        - name: podcastId
           in: path
           required: true
           schema:
@@ -882,7 +893,7 @@ components:
       properties:
         guid:
           $ref: "#/components/schemas/UUID"
-        podcastGuid:
+        podcastId:
           $ref: "#/components/schemas/UUID"
         seasonNo:
           type: integer

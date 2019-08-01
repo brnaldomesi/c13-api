@@ -1,24 +1,23 @@
-from marshmallow import Schema, fields
 from flask_jwt_extended import jwt_required
 from cadence13.db.tables import Network, Podcast, NetworkSeriesMap
 from cadence13.db.enums import PodcastStatus
 from cadence13.api.util.db import db
-from cadence13.api.common.schema.db import PodcastSchema
-
-
-class NetworkSchema(Schema):
-    #fixme: make network IDs all UUIDs
-    guid = fields.String(attribute='network_id')
-    name = fields.String()
+from cadence13.api.common.schema.db import PodcastSchema, NetworkSchema
+from cadence13.api.common.schema.api import ApiPodcastSchema
 
 
 @jwt_required
 def get_networks():
+    total = (db.session.query(Network.id)
+             .filter_by(status='ACTIVE').count())
     networks = (db.session.query(Network)
                 .filter_by(status='ACTIVE').all())
     schema = NetworkSchema(many=True)
-    result = schema.dump(networks)
-    return result
+    data = schema.dump(networks)
+    return {
+        'total': total,
+        'data': data
+    }
 
 
 @jwt_required
@@ -27,11 +26,11 @@ def create_network():
 
 
 @jwt_required
-def get_podcasts(networkGuid):
+def get_podcasts(networkId):
     podcasts = (db.session.query(Podcast)
                 .join(NetworkSeriesMap, NetworkSeriesMap.series_id == Podcast.series_id)
                 .filter(Podcast.status == PodcastStatus.ACTIVE)
-                .filter(NetworkSeriesMap.network_id == networkGuid)
+                .filter(NetworkSeriesMap.network_id == networkId)
                 .all())
     schema = PodcastSchema(many=True)
     result = schema.dump(podcasts)
