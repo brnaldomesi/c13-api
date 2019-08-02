@@ -1,12 +1,11 @@
+from cadence13.api.common.db.table import ApiPodcast
 from cadence13.api.util.logging import get_logger
 import msgpack
 import enum
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 import operator
-from sqlalchemy.orm import relationship
 from cadence13.db.tables import (
-    Podcast, PodcastConfig, PodcastSocialMedia, Network,
-    PodcastSubscription, EpisodeNew, PodcastCategory, PodcastCategoryMap)
+    Podcast, PodcastSocialMedia, PodcastSubscription, EpisodeNew)
 from cadence13.db.enums import PodcastStatus, EpisodeStatus
 from cadence13.api.util.db import db
 from cadence13.api.util.string import underscore_to_camelcase
@@ -46,16 +45,6 @@ class SortOrder(enum.Enum):
 class PageDirection(enum.Enum):
     FORWARD = enum.auto()
     BACKWARD = enum.auto()
-
-
-class ApiPodcast(Podcast):
-    config = relationship(PodcastConfig, uselist=False)
-    network = relationship(Network, uselist=False)
-    categories = relationship(
-        PodcastCategory,
-        secondary=PodcastCategoryMap.__table__,
-        primaryjoin='ApiPodcast.guid == PodcastCategoryMap.podcast_id'
-    )
 
 
 def _encode_podcast_cursor(result_row):
