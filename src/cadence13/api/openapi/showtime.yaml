@@ -123,6 +123,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /networks/{networkId}:
+    get:
+      summary: Get a network details
+      operationId: network.get_network
+      tags:
+        - networks
+      parameters:
+        - name: networkId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Detailed information for a network
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Network'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /networks/{networkId}/podcasts:
     get:
       summary: List all podcasts in a network
