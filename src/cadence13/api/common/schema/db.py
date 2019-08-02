@@ -6,6 +6,7 @@ import cadence13.db.enums as db_enums
 class NetworkSchema(Schema):
     id = fields.UUID()
     name = fields.String()
+    cover_img_url = fields.String()
 
 
 class PodcastSchema(Schema):

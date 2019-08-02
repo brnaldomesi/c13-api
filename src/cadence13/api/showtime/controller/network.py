@@ -48,6 +48,21 @@ def get_networks():
 
 
 @jwt_required
+def get_network(networkId):
+    row = (db.session.query(Network)
+            .filter_by(status='ACTIVE')
+            .filter(Network.id == networkId)
+            .one_or_none())
+
+    if not row:
+        return 'Not found', 404
+
+    schema = NetworkSchema()
+    result = schema.dump(row)
+    return result
+
+
+@jwt_required
 def create_network():
     return 'Not implemented', 501
 
