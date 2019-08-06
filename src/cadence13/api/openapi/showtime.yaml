@@ -325,12 +325,12 @@ paths:
               schema:
                 type: object
                 required:
-                  - count
+                  - total
                   - nextCursor
                   - prevCursor
                   - data
                 properties:
-                  count:
+                  total:
                     type: integer
                   nextCursor:
                     type: string

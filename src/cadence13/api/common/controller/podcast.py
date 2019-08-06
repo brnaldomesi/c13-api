@@ -191,6 +191,8 @@ def get_episodes(podcast_guid, limit=None, sort_order=None,
             .filter(EpisodeNew.status == EpisodeStatus.ACTIVE)
             .filter(EpisodeNew.published_at != None))
 
+    total = stmt.count()
+
     # Assume this is the first page and use default sort order
     query_order = sort_order
     if cursor:
@@ -234,7 +236,7 @@ def get_episodes(podcast_guid, limit=None, sort_order=None,
 
     return {
         'data': results,
-        'count': len(results),
+        'total': total,
         'nextCursor': next_cursor,
         'prevCursor': prev_cursor
     }
