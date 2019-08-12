@@ -524,6 +524,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update a crew member
+      operationId: podcast.patch_crew_member
+      tags:
+        - podcasts
+        - crew
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: crewMemberId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: An array of crew members
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
 
   /podcasts/{podcastId}/image-upload-url:
     post:
@@ -799,12 +827,17 @@ components:
 
     CrewMember:
       properties:
-        guid:
+        id:
+          readOnly: true
           $ref: '#/components/schemas/UUID'
-        role:
-          $ref: '#/components/schemas/CrewRole'
+        podcastId:
+          readOnly: true
+          $ref: '#/components/schemas/UUID'
+        sortOrder:
+          type: integer
         firstName:
           type: string
+          nullable: true
         middleName:
           type: string
           nullable: true
@@ -812,6 +845,7 @@ components:
           type: string
         biography:
           type: string
+          nullable: true
         imageUrls:
           $ref: '#/components/schemas/ImageUrls'
 
