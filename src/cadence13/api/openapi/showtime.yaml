@@ -479,7 +479,7 @@ paths:
                   $ref: '#/components/schemas/CrewMember'
 
     post:
-      operationId: crew.create_crew_member
+      operationId: podcast.create_crew_member
       tags:
         - podcasts
         - crew
@@ -490,6 +490,34 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/{podcastId}/crew-members/{crewMemberId}:
+    delete:
+      summary: Delete a crew member
+      operationId: podcast.delete_crew_member
+      tags:
+        - podcasts
+        - crew
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: crewMemberId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: An array of crew members
         default:
           description: unexpected error
           content:
@@ -718,19 +746,13 @@ components:
         googlePodcasts:
           type: string
           nullable: true
-        stitcher:
-          type: string
-          nullable: true
         spotify:
           type: string
           nullable: true
         radioCom:
           type: string
           nullable: true
-        iHeart:
-          type: string
-          nullable: true
-        locked:
+        lockedSyncFields:
           type: array
           items:
             type: string
@@ -738,10 +760,8 @@ components:
               - applePodcasts
               - googlePlay
               - googlePodcasts
-              - stitcher
               - spotify
               - radioCom
-              - iHeart
 
     SocialMediaUrls:
       properties:
@@ -760,7 +780,7 @@ components:
         reddit:
           type: string
           nullable: true
-        locked:
+        lockedSyncFields:
           type: array
           items:
             type: string

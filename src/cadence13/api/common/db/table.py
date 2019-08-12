@@ -1,5 +1,4 @@
 from sqlalchemy.orm import relationship
-
 from cadence13.db.tables import (
     Podcast, PodcastConfig, Network,
     PodcastCategory, PodcastCategoryMap)

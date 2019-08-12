@@ -16,11 +16,9 @@ class ApiPodcastSchema(PodcastSchema):
     def split_to_db(self, data, many, **kwargs):
         if 'config' not in data:
             data['config'] = {}
-        for key in ('lockedSyncFields',):
-            if key not in data:
-                continue
-            data['config'][key] = data[key]
-            del data[key]
+        if 'lockedSyncFields' in data:
+            data['config']['lockedSyncFields'] = data['lockedSyncFields']
+            del data['lockedSyncFields']
         return data
 
     @post_dump(pass_many=False)
@@ -28,9 +26,9 @@ class ApiPodcastSchema(PodcastSchema):
         data['id'] = data['guid']
 
         # Special handling for config fields
-        config = data['config'] if data['config'] is not None else {}
-        data['lockedSyncFields'] = config.get('lockedSyncFields', [])
-        del data['config']
+        if data['config'] is not None:
+            data['lockedSyncFields'] = data['config']['lockedSyncFields']
+            del data['config']['lockedSyncFields']
 
         # The image_url field is nested in imageUrls
         data['imageUrls'] = {'original': data['imageUrl']}
@@ -40,6 +38,12 @@ class ApiPodcastSchema(PodcastSchema):
         if data.get('networkId'):
             del data['networkId']
         return data
+
+
+class PodcastSubscriptionSchema(Schema):
+    field_name = fields.String()
+    subscription_url = fields.Url()
+    disable_sync = fields.Boolean()
 
 
 # Alias to the DB version of the schema since they're the same

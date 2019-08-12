@@ -1,4 +1,4 @@
-def underscore_to_camelcase(value):
+def snakecase_to_camelcase(value):
     output = ''
     is_first_word = False
     for word in value.split('_'):
