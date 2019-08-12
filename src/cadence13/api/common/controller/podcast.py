@@ -5,10 +5,11 @@ import enum
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 import operator
 from cadence13.db.tables import (
-    Podcast, PodcastSocialMedia, PodcastSubscription, EpisodeNew)
+    Podcast, PodcastSocialMedia, PodcastSubscription, EpisodeNew, PodcastCrewMember)
 from cadence13.db.enums import PodcastStatus, EpisodeStatus
 from cadence13.api.util.db import db
-from cadence13.api.util.string import underscore_to_camelcase
+from cadence13.api.util.string import snakecase_to_camelcase
+from cadence13.api.common.schema.db import PodcastCrewMemberSchema
 from cadence13.api.common.schema.api import ApiPodcastSchema, ApiEpisodeSchema
 
 logger = get_logger(__name__)
@@ -57,7 +58,7 @@ def _encode_podcast_cursor(result_row):
 
 
 def get_podcasts(limit=None, sort_order=None, next_cursor=None, prev_cursor=None):
-    limit = limit if limit else EPISODES_DEFAULT_LIMIT
+    limit = limit if limit else PODCASTS_DEFAULT_LIMIT
     cursor = next_cursor or prev_cursor
     page_direction = (PageDirection.FORWARD if not cursor or next_cursor
                       else PageDirection.BACKWARD)
@@ -143,7 +144,7 @@ def get_social_media_urls(podcast_guid):
     social_media = (db.session.query(PodcastSocialMedia)
                     .join(Podcast, PodcastSocialMedia.podcast_id == Podcast.id)
                     .filter(Podcast.guid == podcast_guid).all())
-    result = {underscore_to_camelcase(s.social_media_service.name): s.social_media_url
+    result = {snakecase_to_camelcase(s.social_media_service.name): s.social_media_url
               for s in social_media}
     return result
 
@@ -152,7 +153,7 @@ def get_subscription_urls(podcast_guid):
     subscriptions = (db.session.query(PodcastSubscription)
                      .join(Podcast, PodcastSubscription.podcast_id == Podcast.id)
                      .filter(Podcast.guid == podcast_guid).all())
-    result = {underscore_to_camelcase(s.subscription_service.name): s.subscription_url
+    result = {snakecase_to_camelcase(s.subscription_service.name): s.subscription_url
               for s in subscriptions}
     return result
 
@@ -242,18 +243,10 @@ def get_episodes(podcast_guid, limit=None, sort_order=None,
     }
 
 
-# def get_crew_members(podcast_guid):
-#     rows = (db.session.query(PodcastStaffer, Staffer)
-#             .join(Staffer, PodcastStaffer.staffer_id == Staffer.id)
-#             .join(Podcast, Podcast.id == PodcastStaffer.podcast_id)
-#             .filter(Podcast.guid == podcast_guid)
-#             .order_by(PodcastStaffer.sort_no).all())
-#     return [{
-#         'staffer_guid': staffer.guid,
-#         'first_name': staffer.first_name,
-#         'middle_name': staffer.middle_name,
-#         'last_name': staffer.last_name,
-#         'biography': staffer.biography,
-#         'image_url': staffer.image_url,
-#         'sort_no': podcast_staffer.sort_no
-#     } for podcast_staffer, staffer in rows]
+def get_crew_members(podcast_id):
+    rows = (db.session.query(PodcastCrewMember)
+            .filter_by(podcast_id=podcast_id)
+            .filter_by(deleted=False)
+            .order_by(PodcastCrewMember.sort_order.asc()).all())
+    schema = PodcastCrewMemberSchema(many=True)
+    return schema.dump(rows)

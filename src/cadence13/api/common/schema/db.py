@@ -33,6 +33,8 @@ class PodcastSchema(Schema):
 
 class PodcastConfigSchema(Schema):
     locked_sync_fields = fields.List(fields.String(), data_key='lockedSyncFields')
+    metrics_start_date = fields.Date(data_key='metricsStartDate')
+    enable_showpage = fields.Boolean(data_key='enableShowpage')
 
 
 class PodcastCategorySchema(Schema):
@@ -56,5 +58,18 @@ class EpisodeSchema(Schema):
     is_explicit = fields.Boolean(data_key='isExplicit')
     published_at = fields.DateTime(data_key='publishedAt')
     status = EnumField(db_enums.EpisodeStatus)
+    created_at = fields.DateTime(data_key='createdAt')
+    updated_at = fields.DateTime(data_key='updatedAt')
+
+
+class PodcastCrewMemberSchema(Schema):
+    id = fields.UUID()
+    podcast_id = fields.UUID(data_key='podcastId')
+    sort_order = fields.Integer(data_key='sortOrder')
+    first_name = fields.String(data_key='firstName')
+    middle_name = fields.String(data_key='middleName')
+    last_name = fields.String(data_key='lastName')
+    image_url = fields.String(data_key='imageUrl')
+    biography = fields.String()
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
