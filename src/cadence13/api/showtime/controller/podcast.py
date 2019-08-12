@@ -201,10 +201,32 @@ def get_crew_members(podcastId):
 
 @jwt_required
 def create_crew_member(podcastId, body):
+    stmt = (db.session.query(Podcast)
+            .filter_by(guid=podcastId)
+            .exists())
+    exists = db.session.query(stmt).scalar()
+    if not exists:
+        return 'Podcast ID {} does not exist'.format(podcastId), 404
+
     schema = PodcastCrewMemberSchema()
     deserialized = schema.load(body)
     row = PodcastCrewMember(podcast_id=podcastId, **deserialized)
     db.session.add(row)
+    db.session.commit()
+
+
+@jwt_required
+def patch_crew_member(podcastId, crewMemberId, body):
+    row = (db.session.query(PodcastCrewMember)
+           .filter_by(podcast_id=podcastId)
+           .filter_by(id=crewMemberId)
+           .one_or_none())
+    if not row:
+        return 404, 'Not Found'
+    schema = PodcastCrewMemberSchema()
+    deserialized = schema.load(body)
+    for k, v in deserialized.items():
+        setattr(row, k, v)
     db.session.commit()
 
 
@@ -216,7 +238,8 @@ def delete_crew_member(podcastId, crewMemberId):
            .one_or_none())
     if not row:
         return 404, 'Not Found'
-    db.session.delete(row)
+    row.deleted = True
+    db.session.commit()
 
 
 @jwt_required
