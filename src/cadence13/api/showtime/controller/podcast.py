@@ -200,6 +200,17 @@ def get_crew_members(podcastId):
 
 
 @jwt_required
+def get_crew_member(podcastId, crewMemberId):
+    row = (db.session.query(PodcastCrewMember)
+           .filter_by(podcast_id=podcastId)
+           .filter_by(id=crewMemberId)
+           .filter_by(deleted=False)
+           .one_or_none())
+    schema = PodcastCrewMemberSchema()
+    return schema.dump(row)
+
+
+@jwt_required
 def create_crew_member(podcastId, body):
     stmt = (db.session.query(Podcast)
             .filter_by(guid=podcastId)
