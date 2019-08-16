@@ -46,7 +46,7 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 
 # Only allow JWT cookies to be sent over https. In production, this
 # should likely be True
-app.config['JWT_COOKIE_SECURE'] = False
+app.config['JWT_COOKIE_SECURE'] = os.environ.get('ENV', '').lower() in ('prod', 'test')
 
 # Set the cookie paths, so that you are only sending your access token
 # cookie to the access endpoints, and only sending your refresh token
