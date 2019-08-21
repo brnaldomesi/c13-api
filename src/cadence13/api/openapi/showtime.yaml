@@ -1,0 +1,1102 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Cadence13 Dashboard API
+
+paths:
+  /token:
+    delete:
+      summary: Logout and blacklist any non-expired tokens
+      operationId: token.logout
+      tags:
+        - token
+      responses:
+        200:
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  logout:
+                    type: boolean
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /token/auth:
+    post:
+      summary: Login and create a JWT access and refresh token
+      operationId: token.login
+      tags:
+        - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  access_csrf:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /token/refresh:
+    post:
+      summary: Refresh a JWT access token using the fresh token
+      operationId: token.refresh
+      tags:
+        - token
+      responses:
+        200:
+          description: Token successfully refreshed
+          content:
+            application/json:
+              schema:
+                properties:
+                  access_csrf:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /networks:
+    get:
+      summary: List all authorized networks
+      operationId: network.get_networks
+      tags:
+        - networks
+      responses:
+        200:
+          description: An array of networks
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Network'
+
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new network
+      operationId: network.create_network
+      tags:
+        - networks
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /networks/{networkId}:
+    get:
+      summary: Get a network details
+      operationId: network.get_network
+      tags:
+        - networks
+      parameters:
+        - name: networkId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Detailed information for a network
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Network'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /networks/{networkId}/podcasts:
+    get:
+      summary: List all podcasts in a network
+      operationId: network.get_podcasts
+      tags:
+        - networks
+        - podcasts
+      parameters:
+        - name: networkId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts:
+    get:
+      summary: List all authorized podcasts
+      operationId: podcast.get_podcasts
+      tags:
+        - podcasts
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: nextCursor
+          in: query
+          schema:
+            type: string
+        - name: prevCursor
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: A paged array of podcasts
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - nextCursor
+                  - prevCursor
+                  - data
+                properties:
+                  count:
+                    type: integer
+                  nextCursor:
+                    type: string
+                    nullable: true
+                  prevCursor:
+                    type: string
+                    nullable: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Podcast'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/{podcastId}:
+    get:
+      summary: Gets a podcast
+      operationId: podcast.get_podcast
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Detailed information for a podcast
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Podcast'
+
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update an existing podcast
+      operationId: podcast.update_podcast
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Podcast'
+      responses:
+        200:
+          description: Return the updated podcast
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Podcast'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /podcasts/{podcastId}/episodes:
+    get:
+      summary: List all episodes in a podcast
+      operationId: podcast.get_episodes
+      tags:
+        - podcasts
+        - episodes
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: nextCursor
+          in: query
+          schema:
+            type: string
+        - name: prevCursor
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: A paged array of pets
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - nextCursor
+                  - prevCursor
+                  - data
+                properties:
+                  total:
+                    type: integer
+                  nextCursor:
+                    type: string
+                    nullable: true
+                  prevCursor:
+                    type: string
+                    nullable: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Episode'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /podcasts/{podcastId}/config:
+    get:
+      summary: Gets a podcast config
+      operationId: podcast.get_podcast_config
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Return a podcast config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodcastConfig'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update a podcast conifg
+      operationId: podcast.update_podcast_config
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodcastConfig'
+      responses:
+        200:
+          description: Return the updated podcast config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PodcastConfig'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /podcasts/{podcastId}/subscription-urls:
+    get:
+      operationId: podcast.get_subscription_urls
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Array of podcast subscriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionUrls'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      operationId: podcast.patch_subscription_urls
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionUrls'
+      responses:
+        200:
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionUrls'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/{podcastId}/social-media-urls:
+    get:
+      operationId: podcast.get_social_media_urls
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Social media URLs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialMediaUrls'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      operationId: podcast.patch_social_media_urls
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocialMediaUrls'
+      responses:
+        200:
+          description: Social media URLs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialMediaUrls'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/{podcastId}/crew-members:
+    get:
+      summary: Get a list of crew members associated with the podcast
+      operationId: podcast.get_crew_members
+      tags:
+        - podcasts
+        - crew
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: An array of crew members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CrewMember'
+
+    post:
+      operationId: podcast.create_crew_member
+      tags:
+        - podcasts
+        - crew
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/{podcastId}/crew-members/{crewMemberId}:
+    get:
+      summary: Get a crew member
+      operationId: podcast.get_crew_member
+      tags:
+        - podcasts
+        - crew
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: crewMemberId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: A crew & crew member
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a crew member
+      operationId: podcast.delete_crew_member
+      tags:
+        - podcasts
+        - crew
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: crewMemberId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: An array of crew members
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update a crew member
+      operationId: podcast.patch_crew_member
+      tags:
+        - podcasts
+        - crew
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: crewMemberId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: An array of crew members
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+
+  /podcasts/{podcastId}/image-upload-url:
+    post:
+      summary: Generate a pre-signed URL to where an image will be uploaded
+      operationId: podcast.create_image_upload_url
+      tags:
+        - podcasts
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: The presigned POST URL and S3 access credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignedS3PostUrl'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /episodes/{episodeGuid}:
+    patch:
+      summary: Update an existing episode
+      operationId: episode.update_episode
+      tags:
+        - episodes
+      parameters:
+        - name: episodeGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /crew-members/{crewMemberGuid}:
+    get:
+      summary: Get crew member details
+      operationId: crew.get_crew_member
+      tags:
+        - crew
+      parameters:
+        - name: crewMemberGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Return a single crew member
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrewMember'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      summary: Update crew member details
+      operationId: crew.patch_crew_member
+      tags:
+        - crew
+      parameters:
+        - name: crewMemberGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete crew member
+      operationId: crew.delete_crew_member
+      tags:
+        - crew
+      parameters:
+        - name: crewMemberGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /crew-members/{crewMemberGuid}/image-upload-url:
+    post:
+      summary: Generate a pre-signed URL to where an image will be uploaded
+      operationId: crew.create_image_upload_url
+      tags:
+        - crew
+      parameters:
+        - name: crewMemberGuid
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: The presigned POST URL and S3 access credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignedS3PostUrl'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /test:
+    post:
+      summary: Perform a POST against a JWT protected URL
+      operationId: test.test_post
+      tags:
+        - token
+      responses:
+        200:
+          description: Test passed
+          content:
+            application/json:
+              schema:
+                properties:
+                  hello:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: Perform a GET against a JWT protected URL
+      operationId: test.test_get
+      tags:
+        - networks
+      responses:
+        200:
+          description: Test passed
+          content:
+            application/json:
+              schema:
+                properties:
+                  hello:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    UUID:
+      type: string
+      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+
+    PresignedS3PostUrl:
+      properties:
+        url:
+          type: string
+        fields:
+          type: object
+
+    ImageUrls:
+      properties:
+        original:
+          type: string
+        600px:
+          type: string
+
+    Network:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+
+    SubscriptionUrls:
+      properties:
+        applePodcasts:
+          type: string
+          nullable: true
+        googlePlay:
+          type: string
+          nullable: true
+        googlePodcasts:
+          type: string
+          nullable: true
+        spotify:
+          type: string
+          nullable: true
+        radioCom:
+          type: string
+          nullable: true
+        lockedSyncFields:
+          type: array
+          items:
+            type: string
+            enum:
+              - applePodcasts
+              - googlePlay
+              - googlePodcasts
+              - spotify
+              - radioCom
+
+    SocialMediaUrls:
+      properties:
+        facebook:
+          type: string
+          nullable: true
+        pinterest:
+          type: string
+          nullable: true
+        instagram:
+          type: string
+          nullable: true
+        twitter:
+          type: string
+          nullable: true
+        reddit:
+          type: string
+          nullable: true
+        lockedSyncFields:
+          type: array
+          items:
+            type: string
+            enum:
+              - facebook
+              - pinterest
+              - instagram
+              - twitter
+              - reddit
+
+    CrewRole:
+      type: string
+      enum:
+        - HOST
+        - CO_HOST
+
+    CrewMember:
+      properties:
+        id:
+          readOnly: true
+          $ref: '#/components/schemas/UUID'
+        podcastId:
+          readOnly: true
+          $ref: '#/components/schemas/UUID'
+        sortOrder:
+          type: integer
+        firstName:
+          type: string
+          nullable: true
+        middleName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+        biography:
+          type: string
+          nullable: true
+        imageUrls:
+          $ref: '#/components/schemas/ImageUrls'
+
+    PodcastCategory:
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        hash:
+          type: string
+        name:
+          type: string
+
+    PodcastConfig:
+      properties:
+        enableShowpage:
+          type: boolean
+        metricsStartDate:
+          type: string
+          format: date-time
+          nullable: true
+
+    Podcast:
+      properties:
+        guid:
+          $ref: '#/components/schemas/UUID'
+        slug:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        subtitle:
+          type: string
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        copyright:
+          type: string
+          nullable: true
+        author:
+          type: string
+          nullable: true
+        websiteUrl:
+          type: string
+          nullable: true
+        feedUrl:
+          type: string
+        imageUrls:
+          $ref: '#/components/schemas/ImageUrls'
+        ownerName:
+          type: string
+          nullable: true
+        ownerEmail:
+          type: string
+          nullable: true
+        podcastType:
+          type: string
+          enum:
+            - EPISODIC
+            - SERIAL
+        isExplicit:
+          type: boolean
+          nullable: true
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        subscriptionUrls:
+          $ref: '#/components/schemas/SubscriptionUrls'
+        socialMediaUrls:
+          $ref: '#/components/schemas/SocialMediaUrls'
+        crew:
+          type: array
+          items:
+            $ref: '#/components/schemas/CrewMember'
+        tags:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/PodcastCategory'
+        config:
+          $ref: '#/components/schemas/PodcastConfig'
+        lockedSyncFields:
+          type: array
+          items:
+            type: string
+            enum:
+              - slug
+              - title
+              - subtitle
+              - summary
+              - image
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        network:
+          $ref: '#/components/schemas/Network'
+          nullable: true
+
+    Episode:
+      required:
+        - guid
+      properties:
+        guid:
+          $ref: "#/components/schemas/UUID"
+        podcastId:
+          $ref: "#/components/schemas/UUID"
+        seasonNo:
+          type: integer
+          format: int32
+          nullable: true
+        episodeNo:
+          type: integer
+          format: int32
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        subtitle:
+          type: string
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        author:
+          type: string
+          nullable: true
+        episodeType:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        audioUrl:
+          type: string
+          nullable: true
+        isExplicit:
+          type: boolean
+          nullable: true
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

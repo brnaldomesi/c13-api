@@ -1,0 +1,143 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Cadence13 Podcast API
+  license:
+    name: MIT
+paths:
+  /podcasts:
+    get:
+      summary: List all podcasts
+      operationId: cadence13.api.public.podcast.get_podcasts
+      tags:
+        - podcasts
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name:
+      responses:
+        '200':
+          description: A paged array of pets
+          content:
+            application/json:
+              type: object
+              properties:
+                links:
+                  type: object
+                  properties:
+                    next:
+                      type: string
+                    prev:
+                      type: string
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Podcast'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/{podcastGuid}/episodes:
+    get:
+      summary: List all episodes in a podcast
+      operationId: cadence13.api.public.podcast.get_episodes
+      tags:
+        - episodes
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name:
+      responses:
+        '200':
+          description: A paged array of episodes
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: '#/components/schemas/Episode'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    UUID:
+      type: string
+      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    Podcast:
+      required:
+        - guid
+        - slug
+      properties:
+        guid:
+          $ref: '#/components/schemas/UUID'
+        slug:
+          type: string
+
+    Episode:
+      required:
+        - guid
+      properties:
+        guid:
+          $ref: "#/components/schemas/UUID"
+        season_no:
+          type: integer
+          format: int32
+        episode_no:
+          type: integer
+          format: int32
+        title:
+          type: string
+        subtitle:
+          type: string
+        summary:
+          type: string
+        author:
+          type: string
+        episode_type:
+          type: string
+        image_url:
+          type: string
+        audio_url:
+          type: string
+        is_explicit:
+          type: boolean
+        published_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

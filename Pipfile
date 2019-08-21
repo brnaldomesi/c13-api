@@ -1,0 +1,30 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+sqlacodegen = "*"
+
+[packages]
+flask = "*"
+sqlalchemy = "*"
+marshmallow = "*"
+flask-sqlalchemy = "*"
+flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
+connexion = {extras = ["swagger-ui"],version = "*"}
+boto3 = "*"
+marshmallow-enum = "*"
+psycopg2-binary = "*"
+flask-cors = "*"
+flask-jwt-extended = "*"
+argon2-cffi = "*"
+msgpack = "*"
+hashids = "*"
+
+[requires]
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
