@@ -53,6 +53,27 @@ def update_podcast(podcastId, body: dict):
     return get_podcast(podcastId)
 
 
+def get_podcast_config(podcastId):
+    stmt = (db.session.query(db_tables.PodcastConfig).filter_by(podcast_id=podcastId))
+    row = stmt.one_or_none()
+    if not row:
+        return 'Internal Server Error', 500
+    schema = PodcastConfigSchema(exclude=['locked_sync_fields'])
+    return schema.dump(row)
+
+
+def update_podcast_config(podcastId, body):
+    schema = PodcastConfigSchema(exclude=['locked_sync_fields'])
+    deserialized = schema.load(body)
+    stmt = (db.session.query(db_tables.PodcastConfig).filter_by(podcast_id=podcastId))
+    row = stmt.one_or_none()
+    if not row:
+        return 'Internal Server Error', 500
+    for k, v in deserialized.items():
+        setattr(row, k, v)
+    db.session.commit()
+    return schema.dump(row)
+
 # def _create_podcast_config(podcast_guid, params: dict):
 #     select_stmt = (db.session.query(Podcast.id)
 #                    .filter_by(guid=podcast_guid))
@@ -154,7 +175,6 @@ def patch_subscription_urls(podcastId, body):
     for field, url in body.items():
         patchable[field]['subscription_url'] = url
     serialized = patchable.values()
-    logger.info(serialized)
     schema = PodcastSubscriptionSchema(many=True)
     deserialized = schema.load(serialized)
     for subscription in deserialized:
