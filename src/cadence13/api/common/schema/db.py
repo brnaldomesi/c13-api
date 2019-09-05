@@ -73,3 +73,14 @@ class PodcastCrewMemberSchema(Schema):
     biography = fields.String()
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
+
+
+class UserSchema(Schema):
+    id = fields.UUID()
+    first_name = fields.String(data_key='firstName')
+    last_name = fields.String(data_key='lastName')
+    email = fields.Email(data_key='email')
+    is_active = fields.Boolean(data_key='isActive')
+    is_registered = fields.Boolean(data_key='isRegistered')
+    registered_at = fields.DateTime(data_key='registeredAt')
+    created_at = fields.DateTime(data_key='createdAt')
