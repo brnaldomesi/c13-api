@@ -80,6 +80,152 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /users:
+    get:
+      summary: List all users
+      operationId: user.get_users
+      tags:
+      - users
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: nextCursor
+          in: query
+          schema:
+            type: string
+        - name: prevCursor
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: An array of users
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+    post:
+      summary: Create a new user
+      operationId: user.create_user
+      tags:
+      - users
+      requestBody:
+        description: User request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: Create Successful, returns detailed information for the user created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{userId}:
+    get:
+      summary: Get a user details
+      operationId: user.get_user
+      tags:
+      - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Detailed information for a user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update a new user
+      operationId: user.update_user
+      tags:
+      - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        description: User request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: Detailed information for the user updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a user
+      operationId: user.delete_user
+      tags:
+        - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Empty response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /networks:
     get:
       summary: List all authorized networks
@@ -600,7 +746,7 @@ paths:
             $ref: '#/components/schemas/UUID'
       responses:
         200:
-          description: An array of crew members
+          description: Empty response
         default:
           description: unexpected error
           content:
@@ -835,6 +981,41 @@ components:
           type: string
         600px:
           type: string
+
+    User:
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - isActive
+        - isRegistered
+        - registeredAt
+        - createdAt
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+          readOnly: true
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        isActive:
+          type: boolean
+        isRegistered:
+          type: boolean
+          readOnly: true
+        registeredAt:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
 
     Network:
       required:
