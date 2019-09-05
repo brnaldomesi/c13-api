@@ -1,6 +1,7 @@
 from cadence13.api.common.db.table import ApiPodcast
 from cadence13.api.util.logging import get_logger
 import msgpack
+from sqlalchemy import tuple_
 import enum
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 import operator
@@ -84,8 +85,8 @@ def get_podcasts(limit=None, sort_order=None, next_cursor=None, prev_cursor=None
         if prev_cursor:
             query_order = reverse_order
         compare_func = operator.lt if query_order is SortOrder.DESC else operator.gt
-        compare_cols = (ApiPodcast.title, ApiPodcast.guid)
-        compare_vals = (cursor['title'], cursor['guid'])
+        compare_cols = tuple_(ApiPodcast.title, ApiPodcast.guid)
+        compare_vals = tuple_(cursor['title'], cursor['guid'])
         stmt = stmt.filter(compare_func(compare_cols, compare_vals))
 
     # Figure out whether to call desc() or asc() on the fly
@@ -202,8 +203,8 @@ def get_episodes(podcast_guid, limit=None, sort_order=None,
         if prev_cursor:
             query_order = reverse_order
         compare_func = operator.lt if query_order is SortOrder.DESC else operator.gt
-        compare_cols = (EpisodeNew.published_at, EpisodeNew.guid)
-        compare_vals = (cursor['published_at'], cursor['guid'])
+        compare_cols = tuple_(EpisodeNew.published_at, EpisodeNew.guid)
+        compare_vals = tuple_(cursor['published_at'], cursor['guid'])
         stmt = stmt.filter(compare_func(compare_cols, compare_vals))
 
     # Figure out whether to call desc() or asc() on the fly
