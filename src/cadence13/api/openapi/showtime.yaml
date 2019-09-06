@@ -226,6 +226,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /users/validate-email:
+    post:
+      summary: Validate if email is available to use
+      operationId: user.validate_email
+      tags:
+      - users
+      requestBody:
+        description: Includes Email to validate
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+      responses:
+        default:
+          description: Returns response code 200 if valid, 400 if not valid
+          content:
+            application/json:
+              schema:
+                type: string
+
   /networks:
     get:
       summary: List all authorized networks

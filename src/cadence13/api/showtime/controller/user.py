@@ -14,6 +14,7 @@ from cadence13.api.util.pagination import (
     decode_cursor,
     encode_cursor,
 )
+from cadence13.api.util.string import check_email_validity
 
 
 logger = get_logger(__name__)
@@ -157,3 +158,16 @@ def delete_user(userId):
     db.session.delete(row)
     db.session.commit()
     return result
+
+
+def validate_email(body):
+    email = body.get('email')
+    if not email or not check_email_validity(email):
+        return 'Email is invalid', 400
+    row = (db.session.query(User)
+            .filter(User.email == email)
+            .one_or_none())
+    if row is None:
+        return 'Email is valid', 200
+    else:
+        return 'Email already exists', 400
