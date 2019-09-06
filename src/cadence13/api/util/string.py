@@ -1,3 +1,6 @@
+import re
+
+
 def snakecase_to_camelcase(value):
     output = ''
     is_first_word = False
@@ -11,3 +14,12 @@ def snakecase_to_camelcase(value):
             output += word.lower()
         is_first_word = True
     return output
+
+
+regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+
+def check_email_validity(email):
+    if re.search(regex,email):
+        return True
+    else:  
+        return False
