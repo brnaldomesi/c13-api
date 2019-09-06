@@ -16,10 +16,10 @@ def snakecase_to_camelcase(value):
     return output
 
 
-regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+EMAIL_REGEX = re.compile(r'^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$')
 
 def check_email_validity(email):
-    if re.search(regex,email):
+    if re.search(EMAIL_REGEX, email):
         return True
     else:  
         return False
