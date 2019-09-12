@@ -835,34 +835,34 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 
-  /episodes/{episodeGuid}:
-    patch:
-      summary: Update an existing episode
-      operationId: episode.update_episode
-      tags:
-        - episodes
-      parameters:
-        - name: episodeGuid
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      responses:
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+#  /episodes/{episodeId}:
+#    patch:
+#      summary: Update an existing episode
+#      operationId: episode.update_episode
+#      tags:
+#        - episodes
+#      parameters:
+#        - name: episodeId
+#          in: path
+#          required: true
+#          schema:
+#            $ref: '#/components/schemas/UUID'
+#      responses:
+#        default:
+#          description: unexpected error
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
 
-  /crew-members/{crewMemberGuid}:
+  /crew-members/{crewMemberId}:
     get:
       summary: Get crew member details
       operationId: crew.get_crew_member
       tags:
         - crew
       parameters:
-        - name: crewMemberGuid
+        - name: crewMemberId
           in: path
           required: true
           schema:
@@ -887,7 +887,7 @@ paths:
       tags:
         - crew
       parameters:
-        - name: crewMemberGuid
+        - name: crewMemberId
           in: path
           required: true
           schema:
@@ -906,7 +906,7 @@ paths:
       tags:
         - crew
       parameters:
-        - name: crewMemberGuid
+        - name: crewMemberId
           in: path
           required: true
           schema:
@@ -920,14 +920,14 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 
-  /crew-members/{crewMemberGuid}/image-upload-url:
+  /crew-members/{crewMemberId}/image-upload-url:
     post:
       summary: Generate a pre-signed URL to where an image will be uploaded
       operationId: crew.create_image_upload_url
       tags:
         - crew
       parameters:
-        - name: crewMemberGuid
+        - name: crewMemberId
           in: path
           required: true
           schema:
@@ -1159,7 +1159,7 @@ components:
 
     Podcast:
       properties:
-        guid:
+        id:
           $ref: '#/components/schemas/UUID'
         slug:
           type: string
@@ -1246,9 +1246,9 @@ components:
 
     Episode:
       required:
-        - guid
+        - id
       properties:
-        guid:
+        id:
           $ref: "#/components/schemas/UUID"
         podcastId:
           $ref: "#/components/schemas/UUID"

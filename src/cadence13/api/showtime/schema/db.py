@@ -10,7 +10,7 @@ class NetworkSchema(Schema):
 
 
 class PodcastSchema(Schema):
-    guid = fields.UUID()
+    id = fields.UUID()
     slug = fields.String()
     title = fields.String()
     subtitle = fields.String()
@@ -44,8 +44,8 @@ class PodcastCategorySchema(Schema):
 
 
 class EpisodeSchema(Schema):
-    guid = fields.UUID()
-    podcast_guid = fields.UUID(data_key='podcastGuid')
+    id = fields.UUID()
+    podcast_id = fields.UUID(data_key='podcastId')
     season_no = fields.Integer(data_key='seasonNo')
     episode_no = fields.Integer(data_key='episodeNo')
     title = fields.String()

@@ -5,7 +5,7 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from cadence13.api.util.db import db
 from cadence13.api.util.config import config_manager
-from cadence13.api.common.routing import PrefixResolver
+from cadence13.api.util.routing import PrefixResolver
 
 logger = get_logger(__name__)
 logger.info('Setting up application')
