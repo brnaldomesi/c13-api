@@ -1,6 +1,6 @@
 from cadence13.api.util.logging import get_logger
-from marshmallow import Schema, fields, pre_load, pre_dump, post_dump
-from cadence13.api.common.schema.db import (
+from marshmallow import Schema, fields, pre_load, post_dump
+from .db import (
     PodcastSchema, PodcastConfigSchema, PodcastCategorySchema,
     EpisodeSchema, NetworkSchema)
 
@@ -23,8 +23,6 @@ class ApiPodcastSchema(PodcastSchema):
 
     @post_dump(pass_many=False)
     def post_dump(self, data, many, **kwargs):
-        data['id'] = data['guid']
-
         # Special handling for config fields
         if data['config'] is not None:
             data['lockedSyncFields'] = data['config']['lockedSyncFields']
@@ -43,6 +41,12 @@ class ApiPodcastSchema(PodcastSchema):
 class PodcastSubscriptionSchema(Schema):
     field_name = fields.String()
     subscription_url = fields.Url()
+    disable_sync = fields.Boolean()
+
+
+class PodcastSocialMediaSchema(Schema):
+    field_name = fields.String()
+    social_media_url = fields.Url()
     disable_sync = fields.Boolean()
 
 

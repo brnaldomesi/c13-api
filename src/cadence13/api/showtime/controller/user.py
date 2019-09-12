@@ -1,14 +1,12 @@
 from argon2 import PasswordHasher
 from flask_jwt_extended import jwt_required
-from sqlalchemy.sql.functions import count
 from sqlalchemy import tuple_
 import operator
 from cadence13.db.tables import User
 from cadence13.api.util.db import db
-from cadence13.api.common.schema.db import UserSchema
+from cadence13.api.showtime.schema.db import UserSchema
 from cadence13.api.util.logging import get_logger
 from cadence13.api.util.pagination import (
-    DEFAULT_PAGE_LIMIT,
     SortOrder,
     PageDirection,
     decode_cursor,

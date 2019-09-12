@@ -3,9 +3,9 @@ from sqlalchemy.sql.functions import count
 from marshmallow import fields, Schema, post_dump, pre_dump
 from cadence13.db.tables import Network
 from cadence13.api.util.db import db
-from cadence13.api.common.schema.db import NetworkSchema
-from cadence13.api.common.schema.api import ApiPodcastSchema
-from cadence13.api.common.db.table import ApiPodcast
+from cadence13.api.showtime.schema.db import NetworkSchema
+from cadence13.api.showtime.schema.api import ApiPodcastSchema
+from cadence13.api.showtime.db.table import ApiPodcast
 from cadence13.db.enums import PodcastStatus, NetworkStatus
 
 
