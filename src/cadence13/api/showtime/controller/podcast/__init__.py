@@ -288,9 +288,9 @@ def patch_social_media_urls(podcastId, body):
 
 
 @jwt_required
-def get_crew_members(podcast_id):
+def get_crew_members(podcastId):
     rows = (db.session.query(PodcastCrewMember)
-            .filter_by(podcast_id=podcast_id)
+            .filter_by(podcast_id=podcastId)
             .filter_by(deleted=False)
             .order_by(PodcastCrewMember.sort_order.asc()).all())
     schema = PodcastCrewMemberSchema(many=True)
