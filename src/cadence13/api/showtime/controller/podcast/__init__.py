@@ -7,7 +7,7 @@ from cadence13.api.util.logging import get_logger
 import time
 import operator
 import boto3
-from sqlalchemy import tuple_
+from sqlalchemy import or_, tuple_
 from flask_jwt_extended import jwt_required
 from cadence13.api.util.db import db
 import cadence13.db.tables as db_tables
@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 
 
 @jwt_required
-def get_podcasts(limit=None, sortOrder=None, nextCursor=None, prevCursor=None):
+def get_podcasts(search=None, limit=None, sortOrder=None, nextCursor=None, prevCursor=None):
     # Naming convention housekeeping
     sort_order = sortOrder
     next_cursor = nextCursor
@@ -41,6 +41,12 @@ def get_podcasts(limit=None, sortOrder=None, nextCursor=None, prevCursor=None):
     # Base query never changes
     stmt = (db.session.query(ApiPodcast)
             .filter(ApiPodcast.status == PodcastStatus.ACTIVE))
+
+    if search is not None:
+        search_like = '%{}%'.format(search)
+        stmt = stmt.filter(or_(ApiPodcast.title.ilike(search_like),
+                               ApiPodcast.subtitle.ilike(search_like),
+                               ApiPodcast.summary.ilike(search_like)))
 
     # TODO: Add any filters
 
