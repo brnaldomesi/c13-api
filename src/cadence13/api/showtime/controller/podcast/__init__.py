@@ -13,14 +13,43 @@ from cadence13.api.util.db import db
 import cadence13.db.tables as db_tables
 from cadence13.db.enums import PodcastStatus, EpisodeStatus
 from cadence13.db.tables import Podcast, PodcastCrewMember, EpisodeNew
-from cadence13.api.showtime.schema.db import PodcastConfigSchema, PodcastCrewMemberSchema
+from cadence13.api.showtime.schema.db import PodcastSchema, PodcastConfigSchema, PodcastCrewMemberSchema
 from cadence13.api.showtime.schema.api import (ApiPodcastSchema, PodcastSubscriptionSchema,
                                                PodcastSocialMediaSchema, ApiEpisodeSchema)
 import cadence13.api.showtime.model.podcast.subscription as subscription_model
 import cadence13.api.showtime.model.podcast.social_media as social_media_model
 from cadence13.api.showtime.db.table import ApiPodcast
+from cadence13.db.tables import Podcast
 
 logger = get_logger(__name__)
+
+
+@jwt_required
+def search_podcasts(search=None, limit=None):
+    if search is None:
+        return []
+    limit = limit if limit else PODCASTS_DEFAULT_LIMIT
+    # Base query never changes
+    stmt = (db.session.query(Podcast)
+            .filter(Podcast.status == PodcastStatus.ACTIVE))
+
+    search_like = '%{}%'.format(search)
+    podcasts = stmt.filter(or_(Podcast.title.ilike(search_like),
+                           Podcast.subtitle.ilike(search_like),
+                           Podcast.summary.ilike(search_like))) \
+               .order_by(Podcast.title.asc()) \
+               .limit(limit).all()
+    results = [{
+        'id': podcast.id,
+        'slug': podcast.slug,
+        'title': podcast.title,
+        'subtitle': podcast.subtitle,
+        'updatedAt': podcast.updated_at,
+        'imageUrl': podcast.image_url,
+        'author': podcast.author,
+        'summary': podcast.summary,
+    } for podcast in podcasts]
+    return results
 
 
 @jwt_required

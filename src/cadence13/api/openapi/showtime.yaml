@@ -404,6 +404,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /podcasts/search:
+    get:
+      summary: Search authorized podcasts by keyword
+      operationId: podcast.search_podcasts
+      tags:
+        - podcasts
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        200:
+          description: An array of podcasts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PodcastSearch'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /podcasts/{podcastId}:
     get:
       summary: Gets a podcast
@@ -1157,6 +1188,33 @@ components:
         enableShowpage:
           type: boolean
         metricsStartDate:
+          type: string
+          format: date-time
+          nullable: true
+
+    PodcastSearch:
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        slug:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        subtitle:
+          type: string
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        author:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        updatedAt:
           type: string
           format: date-time
           nullable: true
