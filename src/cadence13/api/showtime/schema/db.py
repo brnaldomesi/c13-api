@@ -13,7 +13,7 @@ class PodcastSchema(Schema):
     id = fields.UUID()
     slug = fields.String()
     title = fields.String()
-    subtitle = fields.String()
+    subtitle = fields.String(required=False)
     summary = fields.String()
     podcast_type = EnumField(db_enums.PodcastType, data_key='podcastType')
     copyright = fields.String()
