@@ -40,7 +40,7 @@ class ApiPodcastSchema(PodcastSchema):
 
 class PodcastSubscriptionSchema(Schema):
     field_name = fields.String()
-    subscription_url = fields.Url()
+    subscription_url = fields.Url(allow_none=True)
     disable_sync = fields.Boolean()
 
 
