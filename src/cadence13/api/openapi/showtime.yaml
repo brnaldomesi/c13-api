@@ -526,7 +526,7 @@ paths:
             type: string
       responses:
         200:
-          description: A paged array of pets
+          description: A paged array of episodes
           content:
             application/json:
               schema:
@@ -556,6 +556,74 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /podcasts/{podcastId}/episodes/{episodeId}:
+    get:
+      summary: Get an episode details
+      operationId: podcast.episode.get_episode
+      tags:
+        - podcasts
+        - episodes
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Episode details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Episode'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update an existing episode
+      operationId: podcast.episode.patch_episode
+      tags:
+        - podcasts
+        - episodes
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        description: Episode request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Episode'
+      responses:
+        200:
+          description: Episode details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Episode'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /podcasts/{podcastId}/config:
     get:
@@ -842,7 +910,6 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 
-
   /podcasts/{podcastId}/image-upload-url:
     post:
       summary: Generate a pre-signed URL to where an image will be uploaded
@@ -868,27 +935,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-
-#  /episodes/{episodeId}:
-#    patch:
-#      summary: Update an existing episode
-#      operationId: episode.update_episode
-#      tags:
-#        - episodes
-#      parameters:
-#        - name: episodeId
-#          in: path
-#          required: true
-#          schema:
-#            $ref: '#/components/schemas/UUID'
-#      responses:
-#        default:
-#          description: unexpected error
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/Error'
 
   /crew-members/{crewMemberId}:
     get:
@@ -1312,6 +1358,7 @@ components:
       properties:
         id:
           $ref: "#/components/schemas/UUID"
+          readOnly: true
         podcastId:
           $ref: "#/components/schemas/UUID"
         seasonNo:
@@ -1349,15 +1396,18 @@ components:
           type: string
           format: date-time
           nullable: true
+          readOnly: true
         status:
           type: string
         createdAt:
           type: string
           format: date-time
+          readOnly: true
         updatedAt:
           type: string
           format: date-time
           nullable: true
+          readOnly: true
 
     Error:
       required:
