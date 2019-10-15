@@ -1392,6 +1392,10 @@ components:
         isExplicit:
           type: boolean
           nullable: true
+        tags:
+          type: array
+          items:
+            type: string
         publishedAt:
           type: string
           format: date-time

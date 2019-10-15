@@ -58,6 +58,7 @@ class EpisodeSchema(Schema):
     is_explicit = fields.Boolean(data_key='isExplicit')
     published_at = fields.DateTime(data_key='publishedAt')
     status = EnumField(db_enums.EpisodeStatus)
+    tags = fields.List(fields.String())
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
 
