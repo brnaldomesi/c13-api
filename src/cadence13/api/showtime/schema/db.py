@@ -29,6 +29,9 @@ class PodcastSchema(Schema):
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
     network_id = fields.UUID(data_key='networkId')
+    seo_title = fields.String(data_key='seoTitle', allow_none=True)
+    seo_header = fields.String(data_key='seoHeader', allow_none=True)
+    seo_description = fields.String(data_key='seoDescription', allow_none=True)
 
 
 class PodcastConfigSchema(Schema):
