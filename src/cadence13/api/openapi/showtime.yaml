@@ -1331,6 +1331,15 @@ components:
             $ref: '#/components/schemas/PodcastCategory'
         config:
           $ref: '#/components/schemas/PodcastConfig'
+        seoTitle:
+          type: string
+          nullable: true
+        seoHeader:
+          type: string
+          nullable: true
+        seoDescription:
+          type: string
+          nullable: true
         lockedSyncFields:
           type: array
           items:
