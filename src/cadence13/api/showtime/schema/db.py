@@ -10,10 +10,10 @@ class NetworkSchema(Schema):
 
 
 class PodcastSchema(Schema):
-    guid = fields.UUID()
+    id = fields.UUID()
     slug = fields.String()
     title = fields.String()
-    subtitle = fields.String()
+    subtitle = fields.String(allow_none=True)
     summary = fields.String()
     podcast_type = EnumField(db_enums.PodcastType, data_key='podcastType')
     copyright = fields.String()
@@ -29,6 +29,9 @@ class PodcastSchema(Schema):
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
     network_id = fields.UUID(data_key='networkId')
+    seo_title = fields.String(data_key='seoTitle', allow_none=True)
+    seo_header = fields.String(data_key='seoHeader', allow_none=True)
+    seo_description = fields.String(data_key='seoDescription', allow_none=True)
 
 
 class PodcastConfigSchema(Schema):
@@ -44,8 +47,8 @@ class PodcastCategorySchema(Schema):
 
 
 class EpisodeSchema(Schema):
-    guid = fields.UUID()
-    podcast_guid = fields.UUID(data_key='podcastGuid')
+    id = fields.UUID()
+    podcast_id = fields.UUID(data_key='podcastId')
     season_no = fields.Integer(data_key='seasonNo')
     episode_no = fields.Integer(data_key='episodeNo')
     title = fields.String()
@@ -58,6 +61,7 @@ class EpisodeSchema(Schema):
     is_explicit = fields.Boolean(data_key='isExplicit')
     published_at = fields.DateTime(data_key='publishedAt')
     status = EnumField(db_enums.EpisodeStatus)
+    tags = fields.List(fields.String())
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
 
@@ -73,3 +77,14 @@ class PodcastCrewMemberSchema(Schema):
     biography = fields.String()
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
+
+
+class UserSchema(Schema):
+    id = fields.UUID()
+    first_name = fields.String(data_key='firstName')
+    last_name = fields.String(data_key='lastName')
+    email = fields.Email(data_key='email')
+    is_active = fields.Boolean(data_key='isActive')
+    is_registered = fields.Boolean(data_key='isRegistered')
+    registered_at = fields.DateTime(data_key='registeredAt')
+    created_at = fields.DateTime(data_key='createdAt')

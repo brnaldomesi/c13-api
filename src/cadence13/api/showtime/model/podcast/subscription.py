@@ -1,24 +1,37 @@
-from cadence13.api.util.logging import get_logger
 from datetime import datetime, timezone
-from cadence13.db.tables import PodcastSubscriptionMap, SubscriptionService
-
-logger = get_logger(__name__)
+from sqlalchemy import and_
+from cadence13.db.tables import PodcastSubscription, PodcastSubscriptionType
 
 
 def get_subscription(session, podcast_id, field_name):
-    return (session.query(PodcastSubscriptionMap)
-            .join(SubscriptionService)
-            .filter(PodcastSubscriptionMap.podcast_id == podcast_id)
-            .filter(SubscriptionService.field_name == field_name)
+    return (session.query(PodcastSubscription)
+            .join(PodcastSubscriptionType)
+            .filter(PodcastSubscription.podcast_id == podcast_id)
+            .filter(PodcastSubscriptionType.field_name == field_name)
             .one_or_none())
 
 
+def get_subscription_urls(session, podcast_id):
+    stmt = (session.query(
+                PodcastSubscriptionType.field_name,
+                PodcastSubscription.subscription_url,
+                PodcastSubscription.disable_sync,
+                PodcastSubscription.deleted
+            )
+            .outerjoin(PodcastSubscription, and_(
+                PodcastSubscription.subscription_type_id == PodcastSubscriptionType.id,
+                PodcastSubscription.podcast_id == podcast_id
+            ))
+            .filter(PodcastSubscriptionType.is_active == True))
+    return stmt.all()
+
+
 def create_subscription(session, podcast_id, field_name, params):
-    subquery = (session.query(SubscriptionService.id)
+    subquery = (session.query(PodcastSubscriptionType.id)
                 .filter_by(field_name=field_name))
-    row = PodcastSubscriptionMap(
+    row = PodcastSubscription(
         podcast_id=podcast_id,
-        subscription_service_id=subquery,
+        subscription_type_id=subquery,
         subscription_url=params['subscription_url'] if params.get('subscription_url') else None,
         deleted=not params.get('subscription_url') or params.get('deleted', False),
         disable_sync=params.get('disable_sync', False)
@@ -28,22 +41,19 @@ def create_subscription(session, podcast_id, field_name, params):
 
 
 def get_locked_sync_fields(session, podcast_id):
-    stmt = (session.query(SubscriptionService.field_name)
-            .join(PodcastSubscriptionMap, PodcastSubscriptionMap.subscription_service_id == SubscriptionService.id)
-            .filter(PodcastSubscriptionMap.podcast_id == podcast_id)
-            .filter(PodcastSubscriptionMap.disable_sync == True))
+    stmt = (session.query(PodcastSubscriptionType.field_name)
+            .join(PodcastSubscription, PodcastSubscription.subscription_type_id == PodcastSubscriptionType.id)
+            .filter(PodcastSubscription.podcast_id == podcast_id)
+            .filter(PodcastSubscription.disable_sync == True))
     rows = stmt.all()
     return [r[0] for r in rows]
 
 
 def update_locked_sync_fields(session, podcast_id, locked_fields):
     existing = set(get_locked_sync_fields(session, podcast_id))
-    logger.info('existing: {}'.format(existing))
     desired = set(locked_fields)
     unlock = existing - desired
-    logger.info('to unlock: {}'.format(unlock))
     lock = desired - existing
-    logger.info('to lock: {}'.format(lock))
 
     for field in unlock:
         row = get_subscription(session, podcast_id, field)

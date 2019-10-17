@@ -80,6 +80,178 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /users:
+    get:
+      summary: List all users
+      operationId: user.get_users
+      tags:
+      - users
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: nextCursor
+          in: query
+          schema:
+            type: string
+        - name: prevCursor
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: An array of users
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+    post:
+      summary: Create a new user
+      operationId: user.create_user
+      tags:
+      - users
+      requestBody:
+        description: User request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: Create Successful, returns detailed information for the user created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{userId}:
+    get:
+      summary: Get a user details
+      operationId: user.get_user
+      tags:
+      - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Detailed information for a user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update a new user
+      operationId: user.update_user
+      tags:
+      - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        description: User request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: Detailed information for the user updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a user
+      operationId: user.delete_user
+      tags:
+        - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Empty response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/validate-email:
+    post:
+      summary: Validate if email is available to use
+      operationId: user.validate_email
+      tags:
+      - users
+      requestBody:
+        description: Includes Email to validate
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+      responses:
+        default:
+          description: Returns response code 200 if valid, 400 if not valid
+          content:
+            application/json:
+              schema:
+                type: string
+
   /networks:
     get:
       summary: List all authorized networks
@@ -177,6 +349,10 @@ paths:
       tags:
         - podcasts
       parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
         - name: limit
           in: query
           schema:
@@ -221,6 +397,37 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Podcast'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /podcasts/search:
+    get:
+      summary: Search authorized podcasts by keyword
+      operationId: podcast.search_podcasts
+      tags:
+        - podcasts
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        200:
+          description: An array of podcasts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PodcastSearch'
         default:
           description: unexpected error
           content:
@@ -319,7 +526,7 @@ paths:
             type: string
       responses:
         200:
-          description: A paged array of pets
+          description: A paged array of episodes
           content:
             application/json:
               schema:
@@ -349,6 +556,74 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /podcasts/{podcastId}/episodes/{episodeId}:
+    get:
+      summary: Get an episode details
+      operationId: podcast.episode.get_episode
+      tags:
+        - podcasts
+        - episodes
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        200:
+          description: Episode details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Episode'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update an existing episode
+      operationId: podcast.episode.patch_episode
+      tags:
+        - podcasts
+        - episodes
+      parameters:
+        - name: podcastId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        description: Episode request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Episode'
+      responses:
+        200:
+          description: Episode details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Episode'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /podcasts/{podcastId}/config:
     get:
@@ -600,7 +875,7 @@ paths:
             $ref: '#/components/schemas/UUID'
       responses:
         200:
-          description: An array of crew members
+          description: Empty response
         default:
           description: unexpected error
           content:
@@ -635,7 +910,6 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 
-
   /podcasts/{podcastId}/image-upload-url:
     post:
       summary: Generate a pre-signed URL to where an image will be uploaded
@@ -662,35 +936,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-
-  /episodes/{episodeGuid}:
-    patch:
-      summary: Update an existing episode
-      operationId: episode.update_episode
-      tags:
-        - episodes
-      parameters:
-        - name: episodeGuid
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      responses:
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /crew-members/{crewMemberGuid}:
+  /crew-members/{crewMemberId}:
     get:
       summary: Get crew member details
       operationId: crew.get_crew_member
       tags:
         - crew
       parameters:
-        - name: crewMemberGuid
+        - name: crewMemberId
           in: path
           required: true
           schema:
@@ -715,7 +968,7 @@ paths:
       tags:
         - crew
       parameters:
-        - name: crewMemberGuid
+        - name: crewMemberId
           in: path
           required: true
           schema:
@@ -734,7 +987,7 @@ paths:
       tags:
         - crew
       parameters:
-        - name: crewMemberGuid
+        - name: crewMemberId
           in: path
           required: true
           schema:
@@ -748,14 +1001,14 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 
-  /crew-members/{crewMemberGuid}/image-upload-url:
+  /crew-members/{crewMemberId}/image-upload-url:
     post:
       summary: Generate a pre-signed URL to where an image will be uploaded
       operationId: crew.create_image_upload_url
       tags:
         - crew
       parameters:
-        - name: crewMemberGuid
+        - name: crewMemberId
           in: path
           required: true
           schema:
@@ -835,6 +1088,41 @@ components:
           type: string
         600px:
           type: string
+
+    User:
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - isActive
+        - isRegistered
+        - registeredAt
+        - createdAt
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+          readOnly: true
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        isActive:
+          type: boolean
+        isRegistered:
+          type: boolean
+          readOnly: true
+        registeredAt:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
 
     Network:
       required:
@@ -950,9 +1238,36 @@ components:
           format: date-time
           nullable: true
 
+    PodcastSearch:
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        slug:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        subtitle:
+          type: string
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        author:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
     Podcast:
       properties:
-        guid:
+        id:
           $ref: '#/components/schemas/UUID'
         slug:
           type: string
@@ -1016,6 +1331,15 @@ components:
             $ref: '#/components/schemas/PodcastCategory'
         config:
           $ref: '#/components/schemas/PodcastConfig'
+        seoTitle:
+          type: string
+          nullable: true
+        seoHeader:
+          type: string
+          nullable: true
+        seoDescription:
+          type: string
+          nullable: true
         lockedSyncFields:
           type: array
           items:
@@ -1039,10 +1363,11 @@ components:
 
     Episode:
       required:
-        - guid
+        - id
       properties:
-        guid:
+        id:
           $ref: "#/components/schemas/UUID"
+          readOnly: true
         podcastId:
           $ref: "#/components/schemas/UUID"
         seasonNo:
@@ -1076,19 +1401,26 @@ components:
         isExplicit:
           type: boolean
           nullable: true
+        tags:
+          type: array
+          items:
+            type: string
         publishedAt:
           type: string
           format: date-time
           nullable: true
+          readOnly: true
         status:
           type: string
         createdAt:
           type: string
           format: date-time
+          readOnly: true
         updatedAt:
           type: string
           format: date-time
           nullable: true
+          readOnly: true
 
     Error:
       required:

@@ -1,3 +1,6 @@
 {
-  "database_url": "postgres://dmuserdev:devPasswordHelloWorld@host.docker.internal/cadence13"
+  "database_url": "postgres://dmuserdev:devPasswordHelloWorld@host.docker.internal/cadence13",
+  "showtime": {
+    "jwt_secret_key": "E4KxHTEt3oUMmJuaVWuoPm6NGzFaxbVRn3dWG4uqiH9boiY8hoXZnadMsxRm9pJi"
+  }
 }
