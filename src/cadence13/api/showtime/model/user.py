@@ -5,12 +5,12 @@ from cadence13.db.tables import User
 pw_hasher = PasswordHasher()
 
 
-def create_user(session):
+def create_user(session, first_name, last_name, email, password):
     row = User(
-        first_name='John',
-        last_name='Doe',
-        email='mytest518578922714973582@mailinator.com',
-        password=pw_hasher.hash('supersecretpassword')
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        password=pw_hasher.hash(password)
     )
     session.add(row)
     session.commit()
