@@ -1405,6 +1405,11 @@ components:
           type: array
           items:
             type: string
+        snackableTags:
+          type: array
+          readOnly: true
+          items:
+            type: string
         publishedAt:
           type: string
           format: date-time

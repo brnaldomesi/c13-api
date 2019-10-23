@@ -62,6 +62,7 @@ class EpisodeSchema(Schema):
     published_at = fields.DateTime(data_key='publishedAt')
     status = EnumField(db_enums.EpisodeStatus)
     tags = fields.List(fields.String())
+    snackable_tags = fields.List(fields.String(), data_key='snackableTags')
     created_at = fields.DateTime(data_key='createdAt')
     updated_at = fields.DateTime(data_key='updatedAt')
 
