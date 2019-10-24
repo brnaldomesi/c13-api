@@ -12,7 +12,7 @@ from flask_jwt_extended import jwt_required
 from cadence13.api.util.db import db
 import cadence13.db.tables as db_tables
 from cadence13.db.enums import PodcastStatus, EpisodeStatus
-from cadence13.db.tables import Podcast, PodcastCrewMember, EpisodeNew
+from cadence13.db.tables import Podcast, PodcastConfig, PodcastCrewMember, EpisodeNew
 from cadence13.api.showtime.schema.db import PodcastSchema, PodcastConfigSchema, PodcastCrewMemberSchema
 from cadence13.api.showtime.schema.api import (ApiPodcastSchema, PodcastSubscriptionSchema,
                                                PodcastSocialMediaSchema, ApiEpisodeSchema)
@@ -182,10 +182,12 @@ def update_podcast_config(podcastId, body):
     deserialized = schema.load(body)
     stmt = (db.session.query(db_tables.PodcastConfig).filter_by(podcast_id=podcastId))
     row = stmt.one_or_none()
-    if not row:
-        return 'Internal Server Error', 500
-    for k, v in deserialized.items():
-        setattr(row, k, v)
+    if row:
+        for k, v in deserialized.items():
+            setattr(row, k, v)
+    else:
+        row = PodcastConfig(podcast_id=podcastId, locked_sync_fields=[], **deserialized)
+        db.session.add(row)
     db.session.commit()
     return schema.dump(row)
 
