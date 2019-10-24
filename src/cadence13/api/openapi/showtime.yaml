@@ -1403,6 +1403,7 @@ components:
           nullable: true
         tags:
           type: array
+          nullable: true
           items:
             type: string
         snackableTags:
