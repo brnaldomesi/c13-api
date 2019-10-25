@@ -1350,6 +1350,8 @@ components:
               - subtitle
               - summary
               - image
+              - websiteUrl
+              - tags
         createdAt:
           type: string
           format: date-time

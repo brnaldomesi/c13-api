@@ -173,12 +173,12 @@ def get_podcast_config(podcastId):
     row = stmt.one_or_none()
     if not row:
         return 'Internal Server Error', 500
-    schema = PodcastConfigSchema(exclude=['locked_sync_fields'])
+    schema = PodcastConfigSchema()
     return schema.dump(row)
 
 
 def update_podcast_config(podcastId, body):
-    schema = PodcastConfigSchema(exclude=['locked_sync_fields'])
+    schema = PodcastConfigSchema()
     deserialized = schema.load(body)
     stmt = (db.session.query(db_tables.PodcastConfig).filter_by(podcast_id=podcastId))
     row = stmt.one_or_none()
