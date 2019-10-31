@@ -1231,12 +1231,22 @@ components:
 
     PodcastConfig:
       properties:
-        enableShowpage:
+        enableShowPage:
           type: boolean
-        metricsStartDate:
-          type: string
-          format: date-time
-          nullable: true
+        enableShowHub:
+          type: boolean
+        lockedSyncFields:
+          type: array
+          items:
+            type: string
+            enum:
+              - slug
+              - title
+              - subtitle
+              - summary
+              - image
+              - websiteUrl
+
 
     PodcastSearch:
       properties:
@@ -1340,16 +1350,6 @@ components:
         seoDescription:
           type: string
           nullable: true
-        lockedSyncFields:
-          type: array
-          items:
-            type: string
-            enum:
-              - slug
-              - title
-              - subtitle
-              - summary
-              - image
         createdAt:
           type: string
           format: date-time

@@ -13,9 +13,10 @@ from cadence13.api.util.db import db
 import cadence13.db.tables as db_tables
 from cadence13.db.enums import PodcastStatus, EpisodeStatus
 from cadence13.db.tables import Podcast, PodcastConfig, PodcastCrewMember, EpisodeNew
-from cadence13.api.showtime.schema.db import PodcastSchema, PodcastConfigSchema, PodcastCrewMemberSchema
-from cadence13.api.showtime.schema.api import (ApiPodcastSchema, PodcastSubscriptionSchema,
-                                               PodcastSocialMediaSchema, ApiEpisodeSchema)
+from cadence13.api.showtime.schema.db import PodcastCrewMemberSchema
+from cadence13.api.showtime.schema.api import (ApiPodcastSchema, ApiPodcastConfigSchema,
+                                               PodcastSubscriptionSchema, PodcastSocialMediaSchema,
+                                               ApiEpisodeSchema)
 import cadence13.api.showtime.model.podcast.subscription as subscription_model
 import cadence13.api.showtime.model.podcast.social_media as social_media_model
 from cadence13.api.showtime.db.table import ApiPodcast
@@ -148,46 +149,55 @@ def get_podcast(podcastId):
 
 @jwt_required
 def update_podcast(podcastId, body: dict):
-    schema = ApiPodcastSchema()
-    deserialized = schema.load(body)
-    logger.info(deserialized)
-    # FIXME: check for schema validation errors
+    # Remove config from the body so it can be processed separately.
+    config = body.pop('config', None)
 
-    row = (db.session.query(Podcast)
-           .filter_by(id=podcastId)
-           .one_or_none())
+    if body:
+        schema = ApiPodcastSchema()
+        deserialized = schema.load(body)
+        logger.info(deserialized)
+        # FIXME: check for schema validation errors
 
-    if not row:
-        return 'Not found', 404
+        row = (db.session.query(Podcast)
+               .filter_by(id=podcastId)
+               .one_or_none())
+        if not row:
+            return 'Not found', 404
+        for k, v in deserialized.items():
+            if hasattr(row, k):
+                setattr(row, k, v)
+        db.session.commit()
 
-    for k, v in deserialized.items():
-        if hasattr(row, k):
-            setattr(row, k, v)
+    if config:
+        update_podcast_config(podcastId, config)
 
-    db.session.commit()
     return get_podcast(podcastId)
 
 
+@jwt_required
 def get_podcast_config(podcastId):
-    stmt = (db.session.query(db_tables.PodcastConfig).filter_by(podcast_id=podcastId))
+    stmt = (db.session.query(db_tables.PodcastConfig)
+            .join(db_tables.Podcast, db_tables.PodcastConfig.id == db_tables.Podcast.podcast_config_id)
+            .filter(Podcast.id == podcastId))
     row = stmt.one_or_none()
     if not row:
-        return 'Internal Server Error', 500
-    schema = PodcastConfigSchema(exclude=['locked_sync_fields'])
+        return 'Not Found', 404
+    schema = ApiPodcastConfigSchema()
     return schema.dump(row)
 
 
+@jwt_required
 def update_podcast_config(podcastId, body):
-    schema = PodcastConfigSchema(exclude=['locked_sync_fields'])
+    schema = ApiPodcastConfigSchema()
     deserialized = schema.load(body)
-    stmt = (db.session.query(db_tables.PodcastConfig).filter_by(podcast_id=podcastId))
+    stmt = (db.session.query(db_tables.PodcastConfig)
+            .join(db_tables.Podcast, db_tables.PodcastConfig.id == db_tables.Podcast.podcast_config_id)
+            .filter(Podcast.id == podcastId))
     row = stmt.one_or_none()
-    if row:
-        for k, v in deserialized.items():
-            setattr(row, k, v)
-    else:
-        row = PodcastConfig(podcast_id=podcastId, locked_sync_fields=[], **deserialized)
-        db.session.add(row)
+    if not row:
+        return 'Not Found', 404
+    for k, v in deserialized.items():
+        setattr(row, k, v)
     db.session.commit()
     return schema.dump(row)
 

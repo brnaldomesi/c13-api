@@ -35,9 +35,9 @@ class PodcastSchema(Schema):
 
 
 class PodcastConfigSchema(Schema):
+    enable_show_page = fields.Boolean(data_key='enableShowPage')
+    enable_show_hub = fields.Boolean(data_key='enableShowHub')
     locked_sync_fields = fields.List(fields.String(), data_key='lockedSyncFields')
-    metrics_start_date = fields.Date(data_key='metricsStartDate')
-    enable_showpage = fields.Boolean(data_key='enableShowpage')
 
 
 class PodcastCategorySchema(Schema):

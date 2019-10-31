@@ -6,34 +6,49 @@ from .db import (
 
 logger = get_logger(__name__)
 
+LOCKABLE_FIELDS_API_TO_DB = {
+    'slug': 'SLUG',
+    'title': 'TITLE',
+    'subtitle': 'SUBTITLE',
+    'summary': 'SUMMARY',
+    'image': 'IMAGE',
+    'websiteUrl': 'WEBSITE_URL'
+}
 
-class ApiPodcastSchema(PodcastSchema):
-    config = fields.Nested(PodcastConfigSchema)
-    network = fields.Nested(NetworkSchema)
-    categories = fields.Nested(PodcastCategorySchema, many=True)
+LOCKABLE_FIELDS_DB_TO_API = {v: k for k, v in LOCKABLE_FIELDS_API_TO_DB.items()}
 
+
+class ApiPodcastConfigSchema(PodcastConfigSchema):
     @pre_load(pass_many=False)
-    def split_to_db(self, data, many, **kwargs):
-        if 'config' not in data:
-            data['config'] = {}
+    def pre_load(self, data, many, **kwargs):
         if 'lockedSyncFields' in data:
-            data['config']['lockedSyncFields'] = data['lockedSyncFields']
-            del data['lockedSyncFields']
+            to_db_fields = [LOCKABLE_FIELDS_API_TO_DB[f] for f in data['lockedSyncFields']
+                            if f in LOCKABLE_FIELDS_API_TO_DB]
+            data['lockedSyncFields'] = to_db_fields
         return data
 
     @post_dump(pass_many=False)
     def post_dump(self, data, many, **kwargs):
-        # Special handling for config fields
-        if data['config'] is not None:
-            data['lockedSyncFields'] = data['config']['lockedSyncFields']
-            del data['config']['lockedSyncFields']
+        if 'lockedSyncFields' in data:
+            to_api_fields = [LOCKABLE_FIELDS_DB_TO_API[f] for f in data['lockedSyncFields']
+                             if f in LOCKABLE_FIELDS_DB_TO_API]
+            data['lockedSyncFields'] = to_api_fields
+        return data
 
+
+class ApiPodcastSchema(PodcastSchema):
+    config = fields.Nested(ApiPodcastConfigSchema)
+    network = fields.Nested(NetworkSchema)
+    categories = fields.Nested(PodcastCategorySchema, many=True)
+
+    @post_dump(pass_many=False)
+    def post_dump(self, data, many, **kwargs):
         # The image_url field is nested in imageUrls
         data['imageUrls'] = {'original': data['imageUrl']}
         del data['imageUrl']
 
         # Networks already get their own nested structure
-        if data.get('networkId'):
+        if 'networkId' in data:
             del data['networkId']
         return data
 
