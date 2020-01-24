@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - ./conf/nginx/showtime-api.conf:/etc/nginx/conf.d/showtime-api.conf:ro
+    depends_on:
+      - showtime-api
+
+  showtime-api:
+    build: .
+    command: "showtime"
+    volumes:
+      - ./bin:/opt/cadence13/podcast-api/bin
+      - ./src:/opt/cadence13/podcast-api/src
+      - ./ext:/opt/cadence13/podcast-api/ext
+      - ./conf:/opt/cadence13/podcast-api/conf
+    environment:
+      CONFIG_URL: 'file:///opt/cadence13/podcast-api/conf/config_localdb.json'
