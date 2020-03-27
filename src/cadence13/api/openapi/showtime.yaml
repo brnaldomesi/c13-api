@@ -1151,6 +1151,12 @@ components:
         radioCom:
           type: string
           nullable: true
+        stitcher:
+          type: string
+          nullable: true
+        castbox:
+          type: string
+          nullable: true
         lockedSyncFields:
           type: array
           items:
@@ -1161,6 +1167,8 @@ components:
               - googlePodcasts
               - spotify
               - radioCom
+              - stitcher
+              - castbox
 
     SocialMediaUrls:
       properties:
