@@ -7,7 +7,10 @@ from cadence13.api.showtime.schema.db import NetworkSchema
 from cadence13.api.showtime.schema.api import ApiPodcastSchema
 from cadence13.api.showtime.db.table import ApiPodcast
 from cadence13.db.enums import PodcastStatus, NetworkStatus
+from cadence13.api.util.logging import get_logger
+from cadence13.api.showtime.controller.podcast.__init__ import update_podcast_config
 
+logger = get_logger(__name__)
 
 # Not sure if this should go into common.schema
 # since this might be the only place this is used.
@@ -30,14 +33,12 @@ class ApiNetworkListSchema(Schema):
 
 @jwt_required
 def get_networks():
-    total = (db.session.query(Network.id)
-             .filter_by(status=NetworkStatus.ACTIVE.name).count())
+    total = (db.session.query(Network.id).count())
     # FIXME: The network table is old and stores the status as a string
     # and not enum. Eventually that should change.
     rows = (db.session.query(Network, count(ApiPodcast.id).label('podcast_count'))
             .join(ApiPodcast, Network.id == ApiPodcast.network_id)
             .filter(ApiPodcast.status == PodcastStatus.ACTIVE)
-            .filter(Network.status == NetworkStatus.ACTIVE.name)
             .group_by(Network).all())
     schema = ApiNetworkListSchema(many=True)
     data = schema.dump(rows)
@@ -50,7 +51,6 @@ def get_networks():
 @jwt_required
 def get_network(networkId):
     row = (db.session.query(Network)
-            .filter_by(status='ACTIVE')
             .filter(Network.id == networkId)
             .one_or_none())
 
@@ -65,6 +65,43 @@ def get_network(networkId):
 @jwt_required
 def create_network():
     return 'Not implemented', 501
+
+
+@jwt_required
+def update_network(networkId, body: dict):
+    if body:
+        schema = NetworkSchema()
+        deserialized = schema.load(body)
+        logger.info(deserialized)
+        # FIXME: check for schema validation errors
+
+        row = (db.session.query(Network)
+               .filter_by(id=networkId)
+               .one_or_none())
+        
+        statusChanged = False
+        status = NetworkStatus.ACTIVE.name
+        if not row:
+            return 'Not found', 404
+        for k, v in deserialized.items():
+            if hasattr(row, k):
+                if(k == 'status'):
+                    status = getattr(row, k)
+                    statusChanged = status != v
+                    status = v
+                setattr(row, k, v)
+        db.session.commit()
+
+        if statusChanged:
+            podcasts = get_podcasts(networkId)
+            podcastConfigBody = {
+                'enableShowPage': 1 if(status == NetworkStatus.ACTIVE.name) else 0,
+                'enableShowHub': 1 if(status == NetworkStatus.ACTIVE.name) else 0
+            }
+            for podcast in podcasts:
+                update_podcast_config(podcast.get('id'), podcastConfigBody)
+
+    return get_network(networkId)
 
 
 @jwt_required

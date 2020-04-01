@@ -7,6 +7,7 @@ class NetworkSchema(Schema):
     id = fields.UUID()
     name = fields.String()
     cover_img_url = fields.String()
+    status = fields.String()
 
 
 class PodcastSchema(Schema):

@@ -320,6 +320,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update an existing network
+      operationId: network.update_network
+      tags:
+        - networks
+      parameters:
+        - name: networkId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Network'
+      responses:
+        200:
+          description: Return the updated network
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Network'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /networks/{networkId}/podcasts:
     get:
@@ -1128,10 +1158,14 @@ components:
       required:
         - id
         - name
+        - status
       properties:
         id:
           $ref: '#/components/schemas/UUID'
+          readOnly: true
         name:
+          type: string
+        status:
           type: string
 
     SubscriptionUrls:
