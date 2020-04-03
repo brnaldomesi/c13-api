@@ -8,6 +8,7 @@ class NetworkSchema(Schema):
     name = fields.String()
     cover_img_url = fields.String()
     status = fields.String()
+    publish_date = fields.DateTime()
 
 
 class PodcastSchema(Schema):

@@ -8,7 +8,7 @@ from cadence13.api.showtime.schema.api import ApiPodcastSchema
 from cadence13.api.showtime.db.table import ApiPodcast
 from cadence13.db.enums import PodcastStatus, NetworkStatus
 from cadence13.api.util.logging import get_logger
-from cadence13.api.showtime.controller.podcast.__init__ import update_podcast_config
+from cadence13.api.showtime.controller.podcast.__init__ import update_podcast
 
 logger = get_logger(__name__)
 
@@ -38,7 +38,6 @@ def get_networks():
     # and not enum. Eventually that should change.
     rows = (db.session.query(Network, count(ApiPodcast.id).label('podcast_count'))
             .join(ApiPodcast, Network.id == ApiPodcast.network_id)
-            .filter(ApiPodcast.status == PodcastStatus.ACTIVE)
             .group_by(Network).all())
     schema = ApiNetworkListSchema(many=True)
     data = schema.dump(rows)
@@ -64,7 +63,16 @@ def get_network(networkId):
 
 @jwt_required
 def create_network():
-    return 'Not implemented', 501
+    schema = NetworkSchema()
+    deserialized = schema.load(body)
+    logger.info(deserialized)
+
+    row = Network(**deserialized)
+    db.session.add(row)
+    db.session.commit()
+    schema = NetworkSchema()
+    result = schema.dump(row)
+    return result
 
 
 @jwt_required
@@ -98,8 +106,12 @@ def update_network(networkId, body: dict):
                 'enableShowPage': 1 if(status == NetworkStatus.ACTIVE.name) else 0,
                 'enableShowHub': 1 if(status == NetworkStatus.ACTIVE.name) else 0
             }
+            podcastBody = {
+                'status': PodcastStatus.ACTIVE.name if(status == NetworkStatus.ACTIVE.name) else PodcastStatus.INACTIVE.name,
+                'config': podcastConfigBody
+            }
             for podcast in podcasts:
-                update_podcast_config(podcast.get('id'), podcastConfigBody)
+                update_podcast(podcast.get('id'), podcastBody)
 
     return get_network(networkId)
 
@@ -107,7 +119,6 @@ def update_network(networkId, body: dict):
 @jwt_required
 def get_podcasts(networkId):
     podcasts = (db.session.query(ApiPodcast)
-                .filter(ApiPodcast.status == PodcastStatus.ACTIVE)
                 .filter(ApiPodcast.network_id == networkId)
                 .all())
     schema = ApiPodcastSchema(many=True)

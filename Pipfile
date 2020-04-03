@@ -22,6 +22,7 @@ flask-jwt-extended = "*"
 argon2-cffi = "*"
 msgpack = "*"
 hashids = "*"
+werkzeug = "<0.17"
 
 [requires]
 python_version = "3.7"
