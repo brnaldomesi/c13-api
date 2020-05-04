@@ -54,20 +54,34 @@ def update_locked_sync_fields(session, podcast_id, locked_fields):
     desired = set(locked_fields)
     unlock = existing - desired
     lock = desired - existing
+    new = []
 
     for field in unlock:
         row = get_subscription(session, podcast_id, field)
         if row:
             row.disable_sync = False
         else:
-            create_subscription(session, podcast_id, field, {'disable_sync': False})
+            new.append((field, False))
 
     for field in lock:
         row = get_subscription(session, podcast_id, field)
         if row:
             row.disable_sync = True
         else:
-            create_subscription(session, podcast_id, field, {'disable_sync': True})
+            new.append((field, True))
+
+    # Commit the updated fields
+    try:
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+    # Create new fields
+    for field, disable_sync in new:
+        create_subscription(session, podcast_id, field, {'disable_sync': disable_sync})
 
 
 def update_subscription(session, podcast_id, params):
