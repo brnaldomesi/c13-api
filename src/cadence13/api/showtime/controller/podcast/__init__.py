@@ -299,7 +299,7 @@ def patch_subscription_urls(podcastId, body):
     fields = locked.union(body.keys())
     patchable = {f: {'field_name': f} for f in fields}
     for field, url in body.items():
-        patchable[field]['subscription_url'] = url
+        patchable[field]['subscription_url'] = None if url == '' else url
     serialized = patchable.values()
     schema = PodcastSubscriptionSchema(many=True)
     deserialized = schema.load(serialized)

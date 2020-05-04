@@ -28,7 +28,8 @@ app = rest_app.app
 
 # Configure CORS
 origins = [
-    'localhost',
+    'http://localhost',
+    'http://localhost:3000',
     'https://showtime.cadence13.com',
     'https://showtime-test.cadence13.io',
     'https://showtime-dev.cadence13.io'

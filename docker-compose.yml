@@ -1,14 +1,14 @@
-version: '3.7'
-
+version: '3'
 services:
-  nginx:
-    image: nginx:latest
-    ports:
-      - 8080:8080
+  postgresql:
+    build: conf/ssh-tunnel
     volumes:
-      - ./conf/nginx/showtime-api.conf:/etc/nginx/conf.d/showtime-api.conf:ro
-    depends_on:
-      - showtime-api
+      - $HOME/.ssh:/root/ssh:ro
+    environment:
+      TUNNEL_HOST: postgres-dev-tunnel
+      REMOTE_HOST: cadence13-dev.czty6dewdcqi.us-east-1.rds.amazonaws.com
+      LOCAL_PORT: 5432
+      REMOTE_PORT: 5432
 
   showtime-api:
     build: .
@@ -20,3 +20,14 @@ services:
       - ./conf:/opt/cadence13/podcast-api/conf
     environment:
       CONFIG_URL: 'file:///opt/cadence13/podcast-api/conf/config_dev.json'
+    depends_on:
+      - postgresql
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - ./conf/nginx/showtime-api.conf:/etc/nginx/conf.d/showtime-api.conf:ro
+    depends_on:
+      - showtime-api
