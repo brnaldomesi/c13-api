@@ -292,10 +292,12 @@ def get_subscription_urls(podcastId):
 
 @jwt_required
 def patch_subscription_urls(podcastId, body):
-    locked = set(body.pop('lockedSyncFields', []))
-    subscription_model.update_locked_sync_fields(
-        db.session, podcastId, locked)
-
+    locked = []
+    if 'lockedSyncFields' in body:
+        locked = body.pop('lockedSyncFields')
+        subscription_model.update_locked_sync_fields(
+            db.session, podcastId, locked)
+    locked = set(locked)
     fields = locked.union(body.keys())
     patchable = {f: {'field_name': f} for f in fields}
     for field, url in body.items():
