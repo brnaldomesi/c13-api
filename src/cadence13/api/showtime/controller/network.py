@@ -9,6 +9,8 @@ from cadence13.api.showtime.db.table import ApiPodcast
 from cadence13.db.enums import PodcastStatus, NetworkStatus
 from cadence13.api.util.logging import get_logger
 from cadence13.api.showtime.controller.podcast.__init__ import update_podcast
+from uuid import UUID, uuid4
+from sqlalchemy.sql.functions import now
 
 logger = get_logger(__name__)
 
@@ -62,12 +64,18 @@ def get_network(networkId):
 
 
 @jwt_required
-def create_network():
+def create_network(body):
+    networkId = uuid4()
     schema = NetworkSchema()
     deserialized = schema.load(body)
     logger.info(deserialized)
 
-    row = Network(**deserialized)
+    row = Network(
+        network_id=str(networkId), 
+        id=str(networkId),
+        created_on=now(),
+        **deserialized, 
+    )
     db.session.add(row)
     db.session.commit()
     schema = NetworkSchema()
