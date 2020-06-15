@@ -1,0 +1,47 @@
+get:
+  summary: List all authorized networks
+  operationId: network.get_networks
+  tags:
+    - networks
+  responses:
+    "200":
+      description: An array of networks
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - total
+              - data
+            properties:
+              total:
+                type: integer
+              data:
+                type: array
+                items:
+                  $ref: "../../common/components/schemas/network.yaml#/Network"
+
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "../../common/components/schemas/error.yaml#/Error"
+post:
+  summary: Create a new network
+  operationId: network.create_network
+  tags:
+    - networks
+  responses:
+    "200":
+      description: Create Successful, returns detailed information for the network created
+      content:
+        application/json:
+          schema:
+            $ref: "../../common/components/schemas/network.yaml#/Network"
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "../../common/components/schemas/error.yaml#/Error"

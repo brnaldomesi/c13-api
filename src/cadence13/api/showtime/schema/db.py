@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
-import cadence13.db.enums as db_enums
+import cadence13.db.enums.values as db_enums
 
 
 class NetworkSchema(Schema):

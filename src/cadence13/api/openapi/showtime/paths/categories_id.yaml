@@ -1,0 +1,58 @@
+get:
+  summary: Retrieve a specific category
+  operationId: category.get_category
+  tags:
+    - categories
+  parameters:
+    - name: categoryId
+      in: path
+      required: true
+      schema:
+        $ref: "../../common/components/schemas/uuid.yaml#/UUID"
+  responses:
+    "200":
+      description: Category successfully retrieved
+      content:
+        application/json:
+          schema:
+            $ref: "../../common/components/schemas/category.yaml#/Category"
+
+patch:
+  summary: Update a category
+  operationId: category.update_category
+  tags:
+    - categories
+  parameters:
+    - name: categoryId
+      in: path
+      required: true
+      schema:
+        $ref: "../../common/components/schemas/uuid.yaml#/UUID"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../common/components/schemas/category.yaml#/Category"
+  responses:
+    "200":
+      description: Category successfully updated
+      content:
+        application/json:
+          schema:
+            $ref: "../../common/components/schemas/category.yaml#/Category"
+
+delete:
+  summary: Delete a category
+  operationId: category.delete_category
+  tags:
+    - categories
+  parameters:
+    - name: categoryId
+      in: path
+      required: true
+      schema:
+        $ref: "../../common/components/schemas/uuid.yaml#/UUID"
+  responses:
+    "200":
+      description: "Category deleted"

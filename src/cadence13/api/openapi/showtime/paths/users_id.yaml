@@ -1,0 +1,60 @@
+get:
+  summary: Get a user details
+  operationId: user.get_user
+  tags:
+  - users
+  parameters:
+    - name: userId
+      in: path
+      required: true
+      schema:
+        $ref: "../../common/components/schemas/uuid.yaml#/UUID"
+  responses:
+    "200":
+      description: Detailed information for a user
+      content:
+        application/json:
+          schema:
+            $ref: "../../common/components/schemas/user.yaml#/User"
+
+patch:
+  summary: Update a new user
+  operationId: user.update_user
+  tags:
+  - users
+  parameters:
+    - name: userId
+      in: path
+      required: true
+      schema:
+        $ref: "../../common/components/schemas/uuid.yaml#/UUID"
+  requestBody:
+    description: User request body
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../common/components/schemas/user.yaml#/User"
+  responses:
+    "200":
+      description: Detailed information for the user updated
+      content:
+        application/json:
+          schema:
+            $ref: "../../common/components/schemas/user.yaml#/User"
+
+
+delete:
+  summary: Delete a user
+  operationId: user.delete_user
+  tags:
+    - users
+  parameters:
+    - name: userId
+      in: path
+      required: true
+      schema:
+        $ref: "../../common/components/schemas/uuid.yaml#/UUID"
+  responses:
+    "200":
+      description: Empty response

@@ -1,0 +1,28 @@
+post:
+  summary: Perform a POST against a JWT protected URL
+  operationId: test.test_post
+  tags:
+    - token
+  responses:
+    "200":
+      description: Test passed
+      content:
+        application/json:
+          schema:
+            properties:
+              hello:
+                type: string
+get:
+  summary: Perform a GET against a JWT protected URL
+  operationId: test.test_get
+  tags:
+    - networks
+  responses:
+    "200":
+      description: Test passed
+      content:
+        application/json:
+          schema:
+            properties:
+              hello:
+                type: string

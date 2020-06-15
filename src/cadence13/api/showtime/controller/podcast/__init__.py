@@ -11,7 +11,7 @@ from sqlalchemy import or_, tuple_, and_
 from flask_jwt_extended import jwt_required
 from cadence13.api.util.db import db
 import cadence13.db.tables as db_tables
-from cadence13.db.enums import PodcastStatus, EpisodeStatus
+from cadence13.db.enums.values import PodcastStatus, EpisodeStatus
 from cadence13.db.tables import Podcast, PodcastConfig, PodcastCrewMember, EpisodeNew, NetworkSeriesMap
 from cadence13.api.showtime.schema.db import PodcastCrewMemberSchema
 from cadence13.api.showtime.schema.api import (ApiPodcastSchema, ApiPodcastConfigSchema,

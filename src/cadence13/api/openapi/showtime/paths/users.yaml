@@ -1,0 +1,61 @@
+get:
+  summary: List all users
+  operationId: user.get_users
+  tags:
+    - users
+  parameters:
+    - name: limit
+      in: query
+      schema:
+        type: integer
+    - name: sortOrder
+      in: query
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+    - name: nextCursor
+      in: query
+      schema:
+        type: string
+    - name: prevCursor
+      in: query
+      schema:
+        type: string
+  responses:
+    "200":
+      description: An array of users
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - total
+              - data
+            properties:
+              total:
+                type: integer
+              data:
+                type: array
+                items:
+                  $ref: "../../common/components/schemas/user.yaml#/User"
+#post:
+#  summary: Create a new user
+#  operationId: user.create_user
+#  tags:
+#    - users
+#  requestBody:
+#    description: User request body
+#    required: true
+#    content:
+#      application/json:
+#        schema:
+#          $ref: '../../common/components/schemas/user.yaml#/User'
+#  responses:
+#    "200":
+#      description: Create Successful, returns detailed information for the user created
+#      content:
+#        application/json:
+#          schema:
+#            $ref: '../../common/components/schemas/user.yaml#/User'

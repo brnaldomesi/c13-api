@@ -4,302 +4,26 @@ info:
   title: Cadence13 Dashboard API
 
 paths:
-  /token:
-    delete:
-      summary: Logout and blacklist any non-expired tokens
-      operationId: token.logout
-      tags:
-        - token
-      responses:
-        200:
-          description: Logout successful
-          content:
-            application/json:
-              schema:
-                properties:
-                  logout:
-                    type: boolean
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /token/auth:
-    post:
-      summary: Login and create a JWT access and refresh token
-      operationId: token.login
-      tags:
-        - token
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-                  format: password
-      responses:
-        200:
-          description: Login successful
-          content:
-            application/json:
-              schema:
-                properties:
-                  access_csrf:
-                    type: string
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /token/refresh:
-    post:
-      summary: Refresh a JWT access token using the fresh token
-      operationId: token.refresh
-      tags:
-        - token
-      responses:
-        200:
-          description: Token successfully refreshed
-          content:
-            application/json:
-              schema:
-                properties:
-                  access_csrf:
-                    type: string
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /users:
-    get:
-      summary: List all users
-      operationId: user.get_users
-      tags:
-      - users
-      parameters:
-        - name: limit
-          in: query
-          schema:
-            type: integer
-        - name: sortOrder
-          in: query
-          schema:
-            type: string
-            enum:
-              - asc
-              - desc
-        - name: nextCursor
-          in: query
-          schema:
-            type: string
-        - name: prevCursor
-          in: query
-          schema:
-            type: string
-      responses:
-        200:
-          description: An array of users
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - total
-                  - data
-                properties:
-                  total:
-                    type: integer
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/User'
-    post:
-      summary: Create a new user
-      operationId: user.create_user
-      tags:
-      - users
-      requestBody:
-        description: User request body
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-      responses:
-        200:
-          description: Create Successful, returns detailed information for the user created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /users/{userId}:
-    get:
-      summary: Get a user details
-      operationId: user.get_user
-      tags:
-      - users
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      responses:
-        200:
-          description: Detailed information for a user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    patch:
-      summary: Update a new user
-      operationId: user.update_user
-      tags:
-      - users
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      requestBody:
-        description: User request body
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-      responses:
-        200:
-          description: Detailed information for the user updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    delete:
-      summary: Delete a user
-      operationId: user.delete_user
-      tags:
-        - users
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      responses:
-        200:
-          description: Empty response
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /users/validate-email:
-    post:
-      summary: Validate if email is available to use
-      operationId: user.validate_email
-      tags:
-      - users
-      requestBody:
-        description: Includes Email to validate
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - email
-              properties:
-                email:
-                  type: string
-      responses:
-        default:
-          description: Returns response code 200 if valid, 400 if not valid
-          content:
-            application/json:
-              schema:
-                type: string
-
+  /categories:
+    $ref: "./paths/categories.yaml"
+  /categories/{categoryId}:
+    $ref: "./paths/categories_id.yaml"
   /networks:
-    get:
-      summary: List all authorized networks
-      operationId: network.get_networks
-      tags:
-        - networks
-      responses:
-        200:
-          description: An array of networks
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - total
-                  - data
-                properties:
-                  total:
-                    type: integer
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Network'
-
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    post:
-      summary: Create a new network
-      operationId: network.create_network
-      tags:
-        - networks
-      responses:
-        200:
-          description: Create Successful, returns detailed information for the network created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Network'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+    $ref: "./paths/networks.yaml"
+  /test:
+    $ref: "./paths/test.yaml"
+  /token:
+    $ref: "./paths/token.yaml"
+  /token/auth:
+    $ref: "./paths/token_auth.yaml"
+  /token/refresh:
+    $ref: "./paths/token_refresh.yaml"
+  /users:
+    $ref: "./paths/users.yaml"
+  /users/{userId}:
+    $ref: "./paths/users_id.yaml"
+  /users/validate-email:
+    $ref: "./paths/users_validate_email.yaml"
 
   /networks/{networkId}:
     get:
@@ -314,7 +38,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: Detailed information for a network
           content:
             application/json:
@@ -344,7 +68,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Network'
       responses:
-        200:
+        "200":
           description: Return the updated network
           content:
             application/json:
@@ -409,7 +133,7 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        "200":
           description: A paged array of podcasts
           content:
             application/json:
@@ -456,7 +180,7 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        "200":
           description: An array of podcasts
           content:
             application/json:
@@ -484,7 +208,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: Detailed information for a podcast
           content:
             application/json:
@@ -514,7 +238,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Podcast'
       responses:
-        200:
+        "200":
           description: Return the updated podcast
           content:
             application/json:
@@ -545,7 +269,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Podcast'
       responses:
-        200:
+        "200":
           description: Return the updated podcast
           content:
             application/json:
@@ -591,7 +315,7 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        "200":
           description: A paged array of episodes
           content:
             application/json:
@@ -641,7 +365,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: Episode details
           content:
             application/json:
@@ -678,7 +402,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Episode'
       responses:
-        200:
+        "200":
           description: Episode details
           content:
             application/json:
@@ -704,7 +428,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: Return a podcast config
           content:
             application/json:
@@ -733,7 +457,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PodcastConfig'
       responses:
-        200:
+        "200":
           description: Return the updated podcast config
           content:
             application/json:
@@ -759,7 +483,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: Array of podcast subscriptions
           content:
             application/json:
@@ -787,7 +511,7 @@ paths:
             schema:
               $ref: '#/components/schemas/SubscriptionUrls'
       responses:
-        200:
+        "200":
           description: Update successful
           content:
             application/json:
@@ -812,7 +536,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: Social media URLs
           content:
             application/json:
@@ -840,7 +564,7 @@ paths:
             schema:
               $ref: '#/components/schemas/SocialMediaUrls'
       responses:
-        200:
+        "200":
           description: Social media URLs
           content:
             application/json:
@@ -867,7 +591,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: An array of crew members
           content:
             application/json:
@@ -914,7 +638,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: A crew & crew member
         default:
           description: unexpected error
@@ -940,7 +664,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: Empty response
         default:
           description: unexpected error
@@ -966,7 +690,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: An array of crew members
         default:
           description: unexpected error
@@ -989,7 +713,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: The presigned POST URL and S3 access credentials
           content:
             application/json:
@@ -1015,7 +739,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: Return a single crew member
           content:
             application/json:
@@ -1080,7 +804,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UUID'
       responses:
-        200:
+        "200":
           description: The presigned POST URL and S3 access credentials
           content:
             application/json:
@@ -1093,53 +817,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /test:
-    post:
-      summary: Perform a POST against a JWT protected URL
-      operationId: test.test_post
-      tags:
-        - token
-      responses:
-        200:
-          description: Test passed
-          content:
-            application/json:
-              schema:
-                properties:
-                  hello:
-                    type: string
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    get:
-      summary: Perform a GET against a JWT protected URL
-      operationId: test.test_get
-      tags:
-        - networks
-      responses:
-        200:
-          description: Test passed
-          content:
-            application/json:
-              schema:
-                properties:
-                  hello:
-                    type: string
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
 components:
   schemas:
     UUID:
-      type: string
-      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      $ref: "../common/components/schemas/uuid.yaml#/UUID"
+
+    Category:
+      $ref: "../common/components/schemas/category.yaml#/Category"
 
     PresignedS3PostUrl:
       properties:
@@ -1156,53 +840,10 @@ components:
           type: string
 
     User:
-      required:
-        - id
-        - firstName
-        - lastName
-        - email
-        - isActive
-        - isRegistered
-        - registeredAt
-        - createdAt
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-          readOnly: true
-        firstName:
-          type: string
-        lastName:
-          type: string
-        email:
-          type: string
-        isActive:
-          type: boolean
-        isRegistered:
-          type: boolean
-          readOnly: true
-        registeredAt:
-          type: string
-          format: date-time
-          nullable: true
-          readOnly: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
+      $ref: "../common/components/schemas/user.yaml#/User"
 
     Network:
-      required:
-        - id
-        - name
-        - status
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-          readOnly: true
-        name:
-          type: string
-        status:
-          type: string
+      $ref: "../common/components/schemas/network.yaml#/Network"
 
     SubscriptionUrls:
       properties:
@@ -1324,7 +965,6 @@ components:
               - summary
               - image
               - websiteUrl
-
 
     PodcastSearch:
       properties:
@@ -1507,12 +1147,4 @@ components:
           readOnly: true
 
     Error:
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
+      $ref: "../common/components/schemas/error.yaml#/Error"

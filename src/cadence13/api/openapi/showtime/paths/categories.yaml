@@ -1,0 +1,33 @@
+get:
+  summary: Retrieve a list of podcast categories
+  operationId: category.get_categories
+  tags:
+    - categories
+  responses:
+    "200":
+      description: List of podcast categories
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../../common/components/schemas/category.yaml#/Category"
+
+post:
+  summary: Create a new category
+  operationId: category.create_category
+  tags:
+    - categories
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../common/components/schemas/category.yaml#/Category"
+  responses:
+    "200":
+      description: Category successfully created
+      content:
+        application/json:
+          schema:
+            $ref: "../../common/components/schemas/category.yaml#/Category"
