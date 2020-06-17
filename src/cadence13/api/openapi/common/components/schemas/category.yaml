@@ -1,0 +1,30 @@
+Category:
+  properties:
+    id:
+      $ref: "./uuid.yaml#/UUID"
+      readOnly: true
+    slug:
+      type: string
+      nullable: true
+    name:
+      type: string
+    type:
+      type: string
+      readOnly: true
+    priority:
+      type: integer
+    podcasts:
+      type: array
+      items:
+        type: object
+        required:
+          - id
+        properties:
+          id:
+            $ref: "./uuid.yaml#/UUID"
+          priority:
+            type: integer
+          title:
+            type: string
+          imageUrl:
+            type: string

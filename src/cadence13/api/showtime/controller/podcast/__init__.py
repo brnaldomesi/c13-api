@@ -11,7 +11,7 @@ from sqlalchemy import or_, tuple_, and_
 from flask_jwt_extended import jwt_required
 from cadence13.api.util.db import db
 import cadence13.db.tables as db_tables
-from cadence13.db.enums import PodcastStatus, EpisodeStatus
+from cadence13.db.enums.values import PodcastStatus, EpisodeStatus
 from cadence13.db.tables import Podcast, PodcastConfig, PodcastCrewMember, EpisodeNew, NetworkSeriesMap
 from cadence13.api.showtime.schema.db import PodcastCrewMemberSchema
 from cadence13.api.showtime.schema.api import (ApiPodcastSchema, ApiPodcastConfigSchema,
@@ -131,6 +131,18 @@ def get_podcasts(search=None, limit=None, sortOrder=None, nextCursor=None, prevC
         'nextCursor': next_cursor,
         'prevCursor': prev_cursor
     }
+
+
+@jwt_required
+def get_all_podcasts():
+    rows = (db.session.query(Podcast.id, Podcast.title, Podcast.image_url)
+            .filter_by(status=PodcastStatus.ACTIVE)
+            .all())
+    return [{
+        'id': r.id,
+        'title': r.title,
+        'imageUrl': r.image_url
+    } for r in rows]
 
 
 @jwt_required

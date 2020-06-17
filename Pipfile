@@ -23,6 +23,7 @@ argon2-cffi = "*"
 msgpack = "*"
 hashids = "*"
 werkzeug = "<0.17"
+prance = "*"
 
 [requires]
 python_version = "3.7"

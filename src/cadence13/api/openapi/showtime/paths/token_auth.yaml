@@ -1,0 +1,24 @@
+post:
+  summary: Login and create a JWT access and refresh token
+  operationId: token.login
+  tags:
+    - token
+  requestBody:
+    content:
+      application/json:
+        schema:
+          properties:
+            username:
+              type: string
+            password:
+              type: string
+              format: password
+  responses:
+    "200":
+      description: Login successful
+      content:
+        application/json:
+          schema:
+            properties:
+              access_csrf:
+                type: string

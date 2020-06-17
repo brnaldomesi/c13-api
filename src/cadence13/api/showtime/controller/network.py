@@ -6,7 +6,7 @@ from cadence13.api.util.db import db
 from cadence13.api.showtime.schema.db import NetworkSchema
 from cadence13.api.showtime.schema.api import ApiPodcastSchema
 from cadence13.api.showtime.db.table import ApiPodcast
-from cadence13.db.enums import PodcastStatus, NetworkStatus
+from cadence13.db.enums.values import PodcastStatus, NetworkStatus
 from cadence13.api.util.logging import get_logger
 from cadence13.api.showtime.controller.podcast.__init__ import update_podcast
 from uuid import UUID, uuid4

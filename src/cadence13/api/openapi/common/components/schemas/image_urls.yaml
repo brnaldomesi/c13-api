@@ -1,0 +1,6 @@
+ImageUrls:
+  properties:
+    original:
+      type: string
+    600px:
+      type: string

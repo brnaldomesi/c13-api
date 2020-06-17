@@ -1,20 +1,34 @@
-from cadence13.api.util.logging import get_logger
 import os.path
+from pathlib import Path
+from typing import Any, Dict
+
 import connexion
-from flask_jwt_extended import JWTManager
+import prance
 from flask_cors import CORS
-from cadence13.api.util.db import db
+from flask_jwt_extended import JWTManager
+
 from cadence13.api.util.config import config_manager
+from cadence13.api.util.db import db
+from cadence13.api.util.logging import get_logger
 from cadence13.api.util.routing import PrefixResolver
 
 logger = get_logger(__name__)
+
+
+def get_bundled_specs(main_file: Path) -> Dict[str, Any]:
+    parser = prance.ResolvingParser(str(main_file.absolute()), lazy=True, strict=True,
+                                    backend='openapi-spec-validator')
+    parser.parse()
+    return parser.specification
+
+
 logger.info('Setting up application')
 
 # Create the Connexion application instance
-rest_app = connexion.FlaskApp(__name__, specification_dir='../openapi')
+rest_app = connexion.FlaskApp(__name__)
 
 # Read the swagger.yml file to configure the endpoints
-rest_app.add_api('showtime.yaml',
+rest_app.add_api(get_bundled_specs(Path(os.path.dirname(__file__), '../openapi/showtime/index.yaml')),
                  validate_responses=True,
                  resolver=PrefixResolver('cadence13.api.showtime.controller.'))
 
