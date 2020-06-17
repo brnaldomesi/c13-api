@@ -8,6 +8,8 @@ paths:
     $ref: "./paths/categories.yaml"
   /categories/{categoryId}:
     $ref: "./paths/categories_id.yaml"
+  /podcasts/all:
+    $ref: "./paths/podcasts_all.yaml"
   /networks:
     $ref: "./paths/networks.yaml"
   /test:

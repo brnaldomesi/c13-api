@@ -134,6 +134,18 @@ def get_podcasts(search=None, limit=None, sortOrder=None, nextCursor=None, prevC
 
 
 @jwt_required
+def get_all_podcasts():
+    rows = (db.session.query(Podcast.id, Podcast.title, Podcast.image_url)
+            .filter_by(status=PodcastStatus.ACTIVE)
+            .all())
+    return [{
+        'id': r.id,
+        'title': r.title,
+        'imageUrl': r.image_url
+    } for r in rows]
+
+
+@jwt_required
 def get_podcast(podcastId):
     row = (db.session.query(ApiPodcast)
            .filter(ApiPodcast.id == podcastId)
