@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 
 import cadence13.db.enums.values as db_enums
 from cadence13.api.util.db import db
@@ -11,6 +12,18 @@ from cadence13.api.util.logging import get_logger
 from cadence13.db.tables import Category, CategoryPodcastMap, CategoryType, Podcast
 
 logger = get_logger(__name__)
+
+
+class InvalidCategoryType(Exception):
+    pass
+
+
+class CategoryNotFound(Exception):
+    pass
+
+
+class CategorySlugTaken(Exception):
+    pass
 
 
 @lru_cache()
@@ -112,6 +125,7 @@ def create_category(body: dict):
         db.session.add(row)
         db.session.commit()
     except IntegrityError:
+        # FIXME: Making an assumption here
         return 'Slug already taken', 409
 
     return get_category(category_id)
@@ -130,35 +144,69 @@ def _update_category_podcasts(category_id, podcasts):
         ))
 
 
-@jwt_required
-def update_category(categoryId, body):
-    podcasts = body.pop('podcasts', [])
+def _update_category(category_id, body):
+    # Careful not to pass an empty array or else all
+    # podcasts in a category could be deleted!
+    podcasts = body.pop('podcasts', None)
 
-    row = (db.session.query(Category, CategoryType.key)
-           .join(CategoryType, Category.category_type_id == CategoryType.id)
-           .filter(Category.id == categoryId)
-           .one_or_none())
-    if not row:
-        return 'Not found', 404
+    try:
+        row = (db.session.query(Category, CategoryType.key)
+               .join(CategoryType, Category.category_type_id == CategoryType.id)
+               .filter(Category.id == category_id)
+               .one())
+    except NoResultFound:
+        raise CategoryNotFound(f'Category {category_id} not found')
 
     category = row[0]
     category_type = db_enums.CategoryType[row[1]]
-    if category_type is not db_enums.CategoryType.CUSTOM:
-        return "Can only update 'CUSTOM' categories", 400
+    if isinstance(podcasts, list) and category_type is not db_enums.CategoryType.CUSTOM:
+        raise InvalidCategoryType(f'Cannot modify podcasts for category {category_id} '
+                                  f'of type {category_type.name}')
 
     try:
         with db.session.begin_nested():
             for k, v in body.items():
-                if hasattr(category, k):
+                if hasattr(category, k) and getattr(category, k) != v:
                     setattr(category, k, v)
     except IntegrityError:
-        return 'Slug already taken', 409
+        raise CategorySlugTaken(f'Cannot update category {category_id}; '
+                                f'slug {body.get("slug")} is already taken')
 
-    with db.session.begin_nested():
-        _update_category_podcasts(category.id, podcasts)
+    if podcasts is not None:
+        with db.session.begin_nested():
+            _update_category_podcasts(category.id, podcasts)
 
+
+def _update_category_priority(category_id, priority):
+    (db.session.query(Category)
+     .filter(Category.id == category_id)
+     .update({Category.priority: priority}))
+
+
+@jwt_required
+def update_category(categoryId, body):
+    try:
+        _update_category(categoryId, body)
+    except InvalidCategoryType as ex:
+        return str(ex), 400
+    except CategoryNotFound as ex:
+        return str(ex), 404
+    except CategorySlugTaken as ex:
+        return str(ex), 409
     db.session.commit()
     return get_category(categoryId)
+
+
+@jwt_required
+def update_categories(body):
+    """Update multiple categories."""
+    for category in body:
+        category_id = category.pop('id')
+        priority = category.pop('priority', 0)
+        with db.session.begin_nested():
+            _update_category_priority(category_id, priority)
+    db.session.commit()
+    return get_categories()
 
 
 @jwt_required

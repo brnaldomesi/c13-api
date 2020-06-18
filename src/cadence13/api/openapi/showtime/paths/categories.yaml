@@ -31,3 +31,34 @@ post:
         application/json:
           schema:
             $ref: "../../common/components/schemas/category.yaml#/Category"
+
+patch:
+  summary: Update multiple categories
+  operationId: category.update_categories
+  tags:
+    - categories
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - priority
+            properties:
+              id:
+                $ref: "../../common/components/schemas/uuid.yaml#/UUID"
+              priority:
+                type: integer
+  responses:
+    "200":
+      description: Categories successfully updated
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../../common/components/schemas/category.yaml#/Category"
