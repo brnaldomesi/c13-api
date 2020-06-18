@@ -1,8 +1,9 @@
 Category:
   properties:
     id:
-      $ref: "./uuid.yaml#/UUID"
       readOnly: true
+      allOf:
+        - $ref: "./uuid.yaml#/UUID"
     slug:
       type: string
       nullable: true
