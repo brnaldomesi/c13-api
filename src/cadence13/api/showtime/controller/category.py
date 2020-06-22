@@ -27,7 +27,7 @@ class CategorySlugTaken(Exception):
 
 
 @lru_cache()
-def _get_category_type_id(key):
+def _get_category_type_id(key: str) -> str:
     return db.session.query(CategoryType.id).filter_by(key=key).scalar()
 
 
@@ -111,27 +111,10 @@ def get_category(categoryId):
     return result
 
 
-@jwt_required
-def create_category(body: dict):
-    category_id = str(uuid4())
-    row = Category(
-        id=category_id,
-        slug=body.get('slug'),
-        name=body['name'],
-        category_type_id=_get_category_type_id(db_enums.CategoryType.CUSTOM.name),
-        priority=body.get('priority', 0)
-    )
-    try:
-        db.session.add(row)
-        db.session.commit()
-    except IntegrityError:
-        # FIXME: Making an assumption here
-        return 'Slug already taken', 409
+def _update_category_podcasts(category_id: str, podcasts: dict = None) -> None:
+    if not podcasts:
+        return
 
-    return get_category(category_id)
-
-
-def _update_category_podcasts(category_id, podcasts):
     (db.session.query(CategoryPodcastMap)
      .filter_by(category_id=category_id)
      .delete())
@@ -144,7 +127,7 @@ def _update_category_podcasts(category_id, podcasts):
         ))
 
 
-def _update_category(category_id, body):
+def _update_category(category_id: str, body: dict) -> None:
     # Careful not to pass an empty array or else all
     # podcasts in a category could be deleted!
     podcasts = body.pop('podcasts', None)
@@ -177,10 +160,35 @@ def _update_category(category_id, body):
             _update_category_podcasts(category.id, podcasts)
 
 
-def _update_category_priority(category_id, priority):
+def _update_category_priority(category_id: str, priority: int) -> None:
     (db.session.query(Category)
      .filter(Category.id == category_id)
      .update({Category.priority: priority}))
+
+
+@jwt_required
+def create_category(body: dict):
+    podcasts = body.pop('podcasts', None)
+    category_id = str(uuid4())
+    row = Category(
+        id=category_id,
+        slug=body.get('slug'),
+        name=body['name'],
+        category_type_id=_get_category_type_id(db_enums.CategoryType.CUSTOM.name),
+        priority=body.get('priority', 0)
+    )
+    with db.session.begin_nested():
+        try:
+            db.session.add(row)
+        except IntegrityError:
+            # FIXME: Making an assumption here
+            return 'Slug already taken', 409
+
+    with db.session.begin_nested():
+        _update_category_podcasts(category_id, podcasts)
+
+    db.session.commit()
+    return get_category(category_id)
 
 
 @jwt_required
