@@ -1,0 +1,14 @@
+post:
+  summary: Refresh a JWT access token using the fresh token
+  operationId: token.refresh
+  tags:
+    - token
+  responses:
+    "200":
+      description: Token successfully refreshed
+      content:
+        application/json:
+          schema:
+            properties:
+              access_csrf:
+                type: string

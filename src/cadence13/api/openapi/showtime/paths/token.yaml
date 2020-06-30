@@ -1,0 +1,14 @@
+delete:
+  summary: Logout and blacklist any non-expired tokens
+  operationId: token.logout
+  tags:
+    - token
+  responses:
+    "200":
+      description: Logout successful
+      content:
+        application/json:
+          schema:
+            properties:
+              logout:
+                type: boolean

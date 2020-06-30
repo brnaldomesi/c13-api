@@ -1,0 +1,34 @@
+User:
+  required:
+    - id
+    - firstName
+    - lastName
+    - email
+    - isActive
+    - isRegistered
+    - registeredAt
+    - createdAt
+  properties:
+    id:
+      $ref: "./uuid.yaml#/UUID"
+      readOnly: true
+    firstName:
+      type: string
+    lastName:
+      type: string
+    email:
+      type: string
+    isActive:
+      type: boolean
+    isRegistered:
+      type: boolean
+      readOnly: true
+    registeredAt:
+      type: string
+      format: date-time
+      nullable: true
+      readOnly: true
+    createdAt:
+      type: string
+      format: date-time
+      readOnly: true

@@ -7,12 +7,12 @@ from cadence13.api.util.logging import get_logger
 import time
 import operator
 import boto3
-from sqlalchemy import or_, tuple_
+from sqlalchemy import or_, tuple_, and_
 from flask_jwt_extended import jwt_required
 from cadence13.api.util.db import db
 import cadence13.db.tables as db_tables
-from cadence13.db.enums import PodcastStatus, EpisodeStatus
-from cadence13.db.tables import Podcast, PodcastConfig, PodcastCrewMember, EpisodeNew
+from cadence13.db.enums.values import PodcastStatus, EpisodeStatus
+from cadence13.db.tables import Podcast, PodcastConfig, PodcastCrewMember, EpisodeNew, NetworkSeriesMap
 from cadence13.api.showtime.schema.db import PodcastCrewMemberSchema
 from cadence13.api.showtime.schema.api import (ApiPodcastSchema, ApiPodcastConfigSchema,
                                                PodcastSubscriptionSchema, PodcastSocialMediaSchema,
@@ -134,6 +134,18 @@ def get_podcasts(search=None, limit=None, sortOrder=None, nextCursor=None, prevC
 
 
 @jwt_required
+def get_all_podcasts():
+    rows = (db.session.query(Podcast.id, Podcast.title, Podcast.image_url)
+            .filter_by(status=PodcastStatus.ACTIVE)
+            .all())
+    return [{
+        'id': r.id,
+        'title': r.title,
+        'imageUrl': r.image_url
+    } for r in rows]
+
+
+@jwt_required
 def get_podcast(podcastId):
     row = (db.session.query(ApiPodcast)
            .filter(ApiPodcast.id == podcastId)
@@ -170,6 +182,40 @@ def update_podcast(podcastId, body: dict):
 
     if config:
         update_podcast_config(podcastId, config)
+
+    return get_podcast(podcastId)
+
+
+@jwt_required
+def update_podcast_network(podcastId, body: dict):
+    if body:
+        newNetworkId = body.get('networkId')
+        row = (db.session.query(Podcast)
+               .filter_by(id=podcastId)
+               .one_or_none())
+        if not row:
+            return 'Not found', 404
+        oldNetworkId = getattr(row, 'network_id')
+        if newNetworkId != oldNetworkId:
+            setattr(row, 'network_id', newNetworkId)
+            db.session.commit()
+            networkPodcastRow = (db.session.query(NetworkSeriesMap)
+                                .filter(and_(NetworkSeriesMap.network_id == oldNetworkId, NetworkSeriesMap.series_id == podcastId))
+                                .one_or_none())
+            if not networkPodcastRow:
+                networkPodcastRow = (db.session.query(NetworkSeriesMap)
+                                .filter(and_(NetworkSeriesMap.network_id == newNetworkId, NetworkSeriesMap.series_id == podcastId))
+                                .one_or_none())
+                if not networkPodcastRow:
+                    networkPodcastRow = NetworkSeriesMap(
+                        network_id=newNetworkId,
+                        series_id=podcastId
+                    )
+                    db.session.add(networkPodcastRow)
+                    db.session.commit()
+            else:
+                setattr(networkPodcastRow, 'network_id', newNetworkId)
+                db.session.commit()
 
     return get_podcast(podcastId)
 

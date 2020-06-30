@@ -1,0 +1,21 @@
+get:
+  summary: Return a bare minimum view of all active podcasts
+  operationId: podcast.get_all_podcasts
+  tags:
+    - podcasts
+  responses:
+    "200":
+      description: An array of podcast IDs and minimal details
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                title:
+                  type: string
+                imageUrl:
+                  type: string
