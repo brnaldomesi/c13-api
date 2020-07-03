@@ -9,7 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 import cadence13.db.enums.values as db_enums
 from cadence13.api.util.db import db
 from cadence13.api.util.logging import get_logger
-from cadence13.db.tables import Category, CategoryPodcastMap, CategoryType, Podcast
+from cadence13.db.tables import Category, CategoryPodcastMap, CategoryType, Podcast, PodcastConfig
 
 logger = get_logger(__name__)
 
@@ -57,8 +57,10 @@ def get_categories():
                              Podcast.image_url)
             .join(Category, Category.id == CategoryPodcastMap.category_id)
             .join(Podcast, Podcast.id == CategoryPodcastMap.podcast_id)
+            .join(PodcastConfig, PodcastConfig.id == Podcast.podcast_config_id)
             .filter(Category.is_active == True,
-                    Podcast.status == db_enums.PodcastStatus.ACTIVE)
+                    Podcast.status == db_enums.PodcastStatus.ACTIVE,
+                    PodcastConfig.enable_show_page == True)
             .order_by(CategoryPodcastMap.priority.desc())
             .all())
     for r in rows:
