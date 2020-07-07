@@ -1,12 +1,9 @@
 Network:
-  required:
-    - id
-    - name
-    - status
   properties:
     id:
-      $ref: './uuid.yaml#/UUID'
       readOnly: true
+      allOf:
+        - $ref: './uuid.yaml#/UUID'
     name:
       type: string
     status:

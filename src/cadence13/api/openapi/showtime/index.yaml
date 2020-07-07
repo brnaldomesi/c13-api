@@ -702,32 +702,6 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 
-  /podcasts/{podcastId}/image-upload-url:
-    post:
-      summary: Generate a pre-signed URL to where an image will be uploaded
-      operationId: podcast.create_image_upload_url
-      tags:
-        - podcasts
-      parameters:
-        - name: podcastId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      responses:
-        "200":
-          description: The presigned POST URL and S3 access credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PresignedS3PostUrl'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
   /crew-members/{crewMemberId}:
     get:
       summary: Get crew member details
@@ -1082,14 +1056,15 @@ components:
           nullable: true
 
     Episode:
-      required:
-        - id
       properties:
         id:
-          $ref: "#/components/schemas/UUID"
           readOnly: true
+          allOf:
+            - $ref: "#/components/schemas/UUID"
         podcastId:
-          $ref: "#/components/schemas/UUID"
+          readOnly: true
+          allOf:
+            - $ref: "#/components/schemas/UUID"
         seasonNo:
           type: integer
           format: int32
