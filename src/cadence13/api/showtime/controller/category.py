@@ -5,6 +5,7 @@ from uuid import uuid4
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql.functions import now
 
 import cadence13.db.enums.values as db_enums
 from cadence13.api.util.db import db
@@ -113,13 +114,13 @@ def get_category(categoryId):
     return result
 
 
-def _update_category_podcasts(category_id: str, podcasts: dict = None) -> None:
+def _replace_category_podcasts(category_id: str, podcasts: dict = None) -> None:
     if not podcasts:
         return
 
     (db.session.query(CategoryPodcastMap)
      .filter_by(category_id=category_id)
-     .delete())
+     .delete(synchronize_session=False))
 
     for p in podcasts:
         db.session.add(CategoryPodcastMap(
@@ -127,6 +128,20 @@ def _update_category_podcasts(category_id: str, podcasts: dict = None) -> None:
             podcast_id=p['id'],
             priority=p.get('priority', 0)
         ))
+
+
+def _update_category_podcast_priorities(category_id: str, podcasts: dict = None) -> None:
+    if not podcasts:
+        return
+
+    for p in podcasts:
+        (db.session.query(CategoryPodcastMap)
+            .filter_by(category_id=category_id,
+                       podcast_id=p['id'])
+            .update({
+                CategoryPodcastMap.priority: p.get('priority', 0),
+                CategoryPodcastMap.updated_at: now()
+            }, synchronize_session=False))
 
 
 def _update_category(category_id: str, body: dict) -> None:
@@ -144,9 +159,6 @@ def _update_category(category_id: str, body: dict) -> None:
 
     category = row[0]
     category_type = db_enums.CategoryType[row[1]]
-    if isinstance(podcasts, list) and category_type is not db_enums.CategoryType.CUSTOM:
-        raise InvalidCategoryType(f'Cannot modify podcasts for category {category_id} '
-                                  f'of type {category_type.name}')
 
     try:
         with db.session.begin_nested():
@@ -159,7 +171,10 @@ def _update_category(category_id: str, body: dict) -> None:
 
     if podcasts is not None:
         with db.session.begin_nested():
-            _update_category_podcasts(category.id, podcasts)
+            if category_type is db_enums.CategoryType.CUSTOM:
+                _replace_category_podcasts(category.id, podcasts)
+            else:
+                _update_category_podcast_priorities(category.id, podcasts)
 
 
 def _update_category_priority(category_id: str, priority: int) -> None:
@@ -187,7 +202,7 @@ def create_category(body: dict):
             return 'Slug already taken', 409
 
     with db.session.begin_nested():
-        _update_category_podcasts(category_id, podcasts)
+        _replace_category_podcasts(category_id, podcasts)
 
     db.session.commit()
     return get_category(category_id)
