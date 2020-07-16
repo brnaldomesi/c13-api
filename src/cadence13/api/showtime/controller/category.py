@@ -100,8 +100,10 @@ def get_category(categoryId):
                              Podcast.title,
                              Podcast.image_url)
             .join(Podcast, Podcast.id == CategoryPodcastMap.podcast_id)
+            .join(PodcastConfig, PodcastConfig.id == Podcast.podcast_config_id)
             .filter(CategoryPodcastMap.category_id == categoryId,
-                    Podcast.status == db_enums.PodcastStatus.ACTIVE)
+                    Podcast.status == db_enums.PodcastStatus.ACTIVE,
+                    PodcastConfig.enable_show_page == True)
             .order_by(CategoryPodcastMap.priority.desc())
             .all())
     result['podcasts'] = [{
