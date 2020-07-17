@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from functools import lru_cache
 from uuid import uuid4
+import re
 
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
@@ -36,8 +37,8 @@ def _get_category_type_id(key: str) -> str:
 def get_categories():
     rows = (db.session.query(Category, CategoryType.key)
             .join(CategoryType, Category.category_type_id == CategoryType.id)
-            .filter(Category.is_active == True,
-                    CategoryType.is_active == True)
+            .filter(Category.deleted.is_(False),
+                    CategoryType.is_active.is_(True))
             .order_by(Category.priority.desc())
             .all())
     categories = OrderedDict()
@@ -48,6 +49,7 @@ def get_categories():
             'priority': c.priority,
             'name': c.name,
             'type': category_type,
+            'hidden': c.hidden,
             'podcasts': []
         }
 
@@ -59,9 +61,9 @@ def get_categories():
             .join(Category, Category.id == CategoryPodcastMap.category_id)
             .join(Podcast, Podcast.id == CategoryPodcastMap.podcast_id)
             .join(PodcastConfig, PodcastConfig.id == Podcast.podcast_config_id)
-            .filter(Category.is_active == True,
+            .filter(Category.deleted.is_(False),
                     Podcast.status == db_enums.PodcastStatus.ACTIVE,
-                    PodcastConfig.enable_show_page == True)
+                    PodcastConfig.enable_show_page.is_(True))
             .order_by(CategoryPodcastMap.priority.desc())
             .all())
     for r in rows:
@@ -80,8 +82,8 @@ def get_category(categoryId):
     row = (db.session.query(Category, CategoryType.key)
            .join(CategoryType, Category.category_type_id == CategoryType.id)
            .filter(Category.id == categoryId,
-                   Category.is_active == True,
-                   CategoryType.is_active == True)
+                   Category.deleted.is_(False),
+                   CategoryType.is_active.is_(True))
            .one_or_none())
     if not row:
         return 'Not found', 404
@@ -92,7 +94,8 @@ def get_category(categoryId):
         'slug': category.slug,
         'priority': category.priority,
         'name': category.name,
-        'type': category_type
+        'type': category_type,
+        'hidden': category.hidden
     }
 
     rows = (db.session.query(CategoryPodcastMap.podcast_id,
@@ -103,7 +106,7 @@ def get_category(categoryId):
             .join(PodcastConfig, PodcastConfig.id == Podcast.podcast_config_id)
             .filter(CategoryPodcastMap.category_id == categoryId,
                     Podcast.status == db_enums.PodcastStatus.ACTIVE,
-                    PodcastConfig.enable_show_page == True)
+                    PodcastConfig.enable_show_page.is_(True))
             .order_by(CategoryPodcastMap.priority.desc())
             .all())
     result['podcasts'] = [{
@@ -241,7 +244,7 @@ def delete_category(categoryId):
     row = (db.session.query(Category, CategoryType.key)
            .join(CategoryType, Category.category_type_id == CategoryType.id)
            .filter(Category.id == categoryId,
-                   Category.is_active == True)
+                   Category.deleted.is_(False))
            .one_or_none())
     if not row:
         return 'Not found', 404
@@ -251,6 +254,7 @@ def delete_category(categoryId):
     if category_type is not db_enums.CategoryType.CUSTOM:
         return "Can only delete 'CUSTOM' categories", 400
 
-    category.is_active = False
+    category.deleted = True
+    category.hidden = True
     category.slug = None
     db.session.commit()
