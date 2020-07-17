@@ -6,6 +6,7 @@ Category:
         - $ref: "./uuid.yaml#/UUID"
     slug:
       type: string
+      pattern: "^[-_0-9a-z]+$"
       nullable: true
     name:
       type: string
@@ -14,6 +15,8 @@ Category:
       readOnly: true
     priority:
       type: integer
+    hidden:
+      type: boolean
     podcasts:
       type: array
       items:
