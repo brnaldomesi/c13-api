@@ -6,7 +6,7 @@ Category:
         - $ref: "./uuid.yaml#/UUID"
     slug:
       type: string
-      pattern: "^[-_0-9a-z]+$"
+      pattern: "^[-_0-9a-zA-Z]+$"
       nullable: true
     name:
       type: string
