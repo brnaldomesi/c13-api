@@ -39,7 +39,7 @@ def get_networks():
     # FIXME: The network table is old and stores the status as a string
     # and not enum. Eventually that should change.
     rows = (db.session.query(Network, count(ApiPodcast.id).label('podcast_count'))
-            .join(ApiPodcast, Network.id == ApiPodcast.network_id)
+            .outerjoin(ApiPodcast, Network.id == ApiPodcast.network_id)
             .group_by(Network).all())
     schema = ApiNetworkListSchema(many=True)
     data = schema.dump(rows)
@@ -71,7 +71,6 @@ def create_network(body):
     logger.info(deserialized)
 
     row = Network(
-        network_id=str(networkId), 
         id=str(networkId),
         created_on=now(),
         **deserialized, 
