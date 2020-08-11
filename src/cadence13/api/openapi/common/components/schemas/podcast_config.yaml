@@ -1,0 +1,19 @@
+PodcastConfig:
+  properties:
+    enableShowPage:
+      type: boolean
+    enableShowHub:
+      type: boolean
+    enablePlayer:
+      type: boolean
+    lockedSyncFields:
+      type: array
+      items:
+        type: string
+        enum:
+          - slug
+          - title
+          - subtitle
+          - summary
+          - image
+          - websiteUrl
