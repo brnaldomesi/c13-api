@@ -1,0 +1,24 @@
+put:
+  summary: Change podcast's network
+  operationId: podcast.network.update_podcast_network
+  tags:
+    - podcasts
+  parameters:
+    - name: podcastId
+      in: path
+      required: true
+      schema:
+        $ref: '../../common/components/schemas/uuid.yaml#UUID'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - networkId
+          properties:
+            networkId:
+              $ref: '../../common/components/schemas/uuid.yaml#UUID'
+  responses:
+    "204":
+      description: Update successful
