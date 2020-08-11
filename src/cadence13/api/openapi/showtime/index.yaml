@@ -925,22 +925,7 @@ components:
           type: string
 
     PodcastConfig:
-      properties:
-        enableShowPage:
-          type: boolean
-        enableShowHub:
-          type: boolean
-        lockedSyncFields:
-          type: array
-          items:
-            type: string
-            enum:
-              - slug
-              - title
-              - subtitle
-              - summary
-              - image
-              - websiteUrl
+      $ref: "../common/components/schemas/podcast_config.yaml#PodcastConfig"
 
     PodcastSearch:
       properties:

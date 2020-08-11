@@ -20,7 +20,7 @@ from cadence13.api.util.db import db
 from cadence13.api.util.logging import get_logger
 from cadence13.db.enums.values import PodcastStatus, EpisodeStatus
 from cadence13.db.tables import Podcast
-from cadence13.db.tables import PodcastCrewMember, EpisodeNew, NetworkSeriesMap
+from cadence13.db.tables import PodcastCrewMember, EpisodeNew
 
 logger = get_logger(__name__)
 

@@ -39,6 +39,7 @@ class PodcastSchema(Schema):
 class PodcastConfigSchema(Schema):
     enable_show_page = fields.Boolean(data_key='enableShowPage')
     enable_show_hub = fields.Boolean(data_key='enableShowHub')
+    enable_player = fields.Boolean(data_key='enablePlayer')
     locked_sync_fields = fields.List(fields.String(), data_key='lockedSyncFields')
 
 
