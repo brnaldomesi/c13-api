@@ -6,7 +6,7 @@ from base64 import urlsafe_b64encode, urlsafe_b64decode
 import boto3
 import msgpack
 from flask_jwt_extended import jwt_required
-from sqlalchemy import or_, tuple_, and_
+from sqlalchemy import or_, tuple_
 
 import cadence13.api.showtime.model.podcast.social_media as social_media_model
 import cadence13.api.showtime.model.podcast.subscription as subscription_model
@@ -182,40 +182,6 @@ def update_podcast(podcastId, body: dict):
 
     if config:
         update_podcast_config(podcastId, config)
-
-    return get_podcast(podcastId)
-
-
-@jwt_required
-def update_podcast_network(podcastId, body: dict):
-    if body:
-        newNetworkId = body.get('networkId')
-        row = (db.session.query(Podcast)
-               .filter_by(id=podcastId)
-               .one_or_none())
-        if not row:
-            return 'Not found', 404
-        oldNetworkId = getattr(row, 'network_id')
-        if newNetworkId != oldNetworkId:
-            setattr(row, 'network_id', newNetworkId)
-            db.session.commit()
-            networkPodcastRow = (db.session.query(NetworkSeriesMap)
-                                .filter(and_(NetworkSeriesMap.network_id == oldNetworkId, NetworkSeriesMap.series_id == podcastId))
-                                .one_or_none())
-            if not networkPodcastRow:
-                networkPodcastRow = (db.session.query(NetworkSeriesMap)
-                                .filter(and_(NetworkSeriesMap.network_id == newNetworkId, NetworkSeriesMap.series_id == podcastId))
-                                .one_or_none())
-                if not networkPodcastRow:
-                    networkPodcastRow = NetworkSeriesMap(
-                        network_id=newNetworkId,
-                        series_id=podcastId
-                    )
-                    db.session.add(networkPodcastRow)
-                    db.session.commit()
-            else:
-                setattr(networkPodcastRow, 'network_id', newNetworkId)
-                db.session.commit()
 
     return get_podcast(podcastId)
 
