@@ -1,6 +1,10 @@
 {
   "database_url": "postgres://postgres:postgres@10.33.33.10/postgres",
   "showtime": {
+    "images": {
+      "image_handler_base_url": null,
+      "bucket": null
+    },
     "jwt_secret_key": "E4KxHTEt3oUMmJuaVWuoPm6NGzFaxbVRn3dWG4uqiH9boiY8hoXZnadMsxRm9pJi"
   }
 }
