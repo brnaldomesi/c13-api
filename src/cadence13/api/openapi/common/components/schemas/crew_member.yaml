@@ -1,0 +1,25 @@
+  CrewMember:
+    properties:
+      id:
+        readOnly: true
+        allOf:
+          - $ref: "./uuid.yaml#/UUID"
+      podcastId:
+        readOnly: true
+        allOf:
+          - $ref: "./uuid.yaml#/UUID"
+      sortOrder:
+        type: integer
+      firstName:
+        type: string
+        nullable: true
+      middleName:
+        type: string
+        nullable: true
+      lastName:
+        type: string
+      biography:
+        type: string
+        nullable: true
+      imageUrls:
+        $ref: "./image_urls.yaml#/ImageUrls"

@@ -673,97 +673,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /images/presigned-post:
+    $ref: "./paths/images/presigned-post.yaml"
+
+  /podcasts/{podcastId}/presigned-post/{imageType}:
+    $ref: "./paths/podcasts/podcastId/presigned-post/imageType.yaml"
+
+  /podcasts/{podcastId}/images:
+    $ref: "./paths/podcasts/podcastId/images.yaml"
+
+  /podcasts/{podcastId}/images/{imageType}:
+    $ref: "./paths/podcasts/podcastId/images/imageType.yaml"
+
+  /crew-members/{crewMemberId}/presigned-post/{imageType}:
+    $ref: "./paths/crew-members/crewMemberId/presigned-post/imageType.yaml"
+
+  /crew-members/{crewMemberId}/images:
+    $ref: "./paths/crew-members/crewMemberId/images.yaml"
+
+  /crew-members/{crewMemberId}/images/{imageType}:
+    $ref: "./paths/crew-members/crewMemberId/images/imageType.yaml"
 
   /crew-members/{crewMemberId}:
-    get:
-      summary: Get crew member details
-      operationId: crew.get_crew_member
-      tags:
-        - crew
-      parameters:
-        - name: crewMemberId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      responses:
-        "200":
-          description: Return a single crew member
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CrewMember'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-    patch:
-      summary: Update crew member details
-      operationId: crew.patch_crew_member
-      tags:
-        - crew
-      parameters:
-        - name: crewMemberId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      responses:
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-    delete:
-      summary: Delete crew member
-      operationId: crew.delete_crew_member
-      tags:
-        - crew
-      parameters:
-        - name: crewMemberId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      responses:
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-
-  /crew-members/{crewMemberId}/image-upload-url:
-    post:
-      summary: Generate a pre-signed URL to where an image will be uploaded
-      operationId: crew.create_image_upload_url
-      tags:
-        - crew
-      parameters:
-        - name: crewMemberId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID'
-      responses:
-        "200":
-          description: The presigned POST URL and S3 access credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PresignedS3PostUrl'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+    $ref: "./paths/crew-members/crewMemberId.yaml"
 
 components:
   schemas:
@@ -772,13 +704,6 @@ components:
 
     Category:
       $ref: "../common/components/schemas/category.yaml#/Category"
-
-    PresignedS3PostUrl:
-      properties:
-        url:
-          type: string
-        fields:
-          type: object
 
     ImageUrls:
       properties:
@@ -864,28 +789,7 @@ components:
         - CO_HOST
 
     CrewMember:
-      properties:
-        id:
-          readOnly: true
-          $ref: '#/components/schemas/UUID'
-        podcastId:
-          readOnly: true
-          $ref: '#/components/schemas/UUID'
-        sortOrder:
-          type: integer
-        firstName:
-          type: string
-          nullable: true
-        middleName:
-          type: string
-          nullable: true
-        lastName:
-          type: string
-        biography:
-          type: string
-          nullable: true
-        imageUrls:
-          $ref: '#/components/schemas/ImageUrls'
+      $ref: "../common/components/schemas/crew_member.yaml#CrewMember"
 
     PodcastCategory:
       properties:

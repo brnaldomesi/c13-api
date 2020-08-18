@@ -1,0 +1,48 @@
+get:
+  summary: Get crew member details
+  operationId: crew.get_crew_member
+  tags:
+    - crew
+  parameters:
+    - name: crewMemberId
+      in: path
+      required: true
+      schema:
+        $ref: "../../../common/components/schemas/uuid.yaml#/UUID"
+  responses:
+    "200":
+      description: Return a single crew member
+      content:
+        application/json:
+          schema:
+            $ref: "../../../common/components/schemas/crew_member.yaml#/CrewMember"
+
+patch:
+  summary: Update crew member details
+  operationId: crew.patch_crew_member
+  tags:
+    - crew
+  parameters:
+    - name: crewMemberId
+      in: path
+      required: true
+      schema:
+        $ref: "../../../common/components/schemas/uuid.yaml#/UUID"
+  responses:
+    default:
+      description: Crew member updated
+
+delete:
+  summary: Delete crew member
+  operationId: crew.delete_crew_member
+  tags:
+    - crew
+  parameters:
+    - name: crewMemberId
+      in: path
+      required: true
+      schema:
+        $ref: "../../../common/components/schemas/uuid.yaml#/UUID"
+  responses:
+    default:
+      description: Crew member deleted

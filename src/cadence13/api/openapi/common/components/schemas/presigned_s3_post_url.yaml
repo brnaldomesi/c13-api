@@ -1,0 +1,6 @@
+PresignedS3PostUrl:
+  properties:
+    url:
+      type: string
+    fields:
+      type: object

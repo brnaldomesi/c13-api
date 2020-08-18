@@ -1,0 +1,52 @@
+patch:
+  summary: Update the source image
+  operationId: podcast.image.update_image
+  parameters:
+    - name: podcastId
+      in: path
+      required: true
+      schema:
+        $ref: "../../../../../common/components/schemas/uuid.yaml#/UUID"
+    - name: imageType
+      in: path
+      required: true
+      schema:
+        type: string
+        enum:
+          - cover
+          - background
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - sourceUrl
+          properties:
+            sourceUrl:
+              type: string
+  responses:
+    "204":
+      description: Image updated
+
+delete:
+  summary: Remove an image used by a cast/crew member
+  operationId: podcast.image.delete_image
+  parameters:
+    - name: podcastId
+      in: path
+      required: true
+      schema:
+        $ref: "../../../../../common/components/schemas/uuid.yaml#/UUID"
+    - name: imageType
+      in: path
+      required: true
+      schema:
+        type: string
+        enum:
+          - cover
+          - background
+  responses:
+    "204":
+      description: Image successfully removed

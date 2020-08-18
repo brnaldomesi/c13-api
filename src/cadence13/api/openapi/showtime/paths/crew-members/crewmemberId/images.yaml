@@ -1,0 +1,12 @@
+get:
+  summary: Fetch images for the cast/crew member
+  operationId: crew.image.get_images
+  parameters:
+    - name: crewMemberId
+      in: path
+      required: true
+      schema:
+        $ref: "../../../../common/components/schemas/uuid.yaml#/UUID"
+  responses:
+    "200":
+      description: List of images and their types
