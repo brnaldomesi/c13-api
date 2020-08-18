@@ -1,0 +1,33 @@
+post:
+  summary: Request temporary authorization to upload an image
+  operationId: crew.image.create_presigned_post
+  parameters:
+    - name: crewMemberId
+      in: path
+      required: true
+      schema:
+        $ref: "../../../../../common/components/schemas/uuid.yaml#/UUID"
+    - name: imageType
+      in: path
+      required: true
+      schema:
+        type: string
+        enum:
+          - profile
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - fileName
+            - contentType
+          properties:
+            fileName:
+              type: string
+            contentType:
+              type: string
+  responses:
+    "200":
+      description: Temporary authorization granted
