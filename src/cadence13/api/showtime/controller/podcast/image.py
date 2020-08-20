@@ -5,43 +5,9 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.orm.exc import NoResultFound
 
 import cadence13.api.showtime.controller.common.image as common_image
-from cadence13.api.showtime.controller.common.image import generate_resized_url
+from cadence13.api.showtime.controller.common.image import generate_image_result
 from cadence13.api.util.db import db
 from cadence13.db.tables import Podcast
-
-
-def generate_image_result(rss_image_url=None, cover_image_url=None, background_image_url=None):
-    result = {}
-
-    if rss_image_url:
-        result['rssCover'] = {
-            'sourceUrl': rss_image_url,
-            'sizes': {
-                'original': generate_resized_url(rss_image_url)
-            }
-        }
-        result['rssCover']['sizes']['100px'] = generate_resized_url(rss_image_url, 100)
-        result['rssCover']['sizes']['1000px'] = generate_resized_url(rss_image_url, 1000)
-
-    if cover_image_url:
-        result['cover'] = {
-            'sourceUrl': cover_image_url,
-            'sizes': {
-                'original': generate_resized_url(cover_image_url)
-            }
-        }
-        result['cover']['sizes']['100px'] = generate_resized_url(cover_image_url, 100)
-        result['cover']['sizes']['1000px'] = generate_resized_url(cover_image_url, 1000)
-
-    if background_image_url:
-        result['background'] = {
-            'sourceUrl': background_image_url,
-            'sizes': {
-                'original': generate_resized_url(background_image_url)
-            }
-        }
-
-    return result
 
 
 @jwt_required
@@ -52,12 +18,11 @@ def get_images(podcastId):
     except NoResultFound:
         return connexion.problem(HTTPStatus.NOT_FOUND, HTTPStatus.NOT_FOUND.phrase,
                                  'Podcast not found')
-
-    return generate_image_result(
-        podcast.rss_image_url,
-        podcast.cover_image_url,
-        podcast.background_image_url
-    )
+    return generate_image_result({
+        'rssImage': podcast.rss_image_url,
+        'cover': podcast.cover_image_url,
+        'background': podcast.background_image_url
+    })
 
 
 @jwt_required

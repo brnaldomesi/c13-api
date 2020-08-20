@@ -10,6 +10,7 @@ from sqlalchemy import or_, tuple_
 
 import cadence13.api.showtime.model.podcast.social_media as social_media_model
 import cadence13.api.showtime.model.podcast.subscription as subscription_model
+from cadence13.api.showtime.controller.common.image import generate_image_result
 import cadence13.db.tables as db_tables
 from cadence13.api.showtime.db.table import ApiPodcast
 from cadence13.api.showtime.schema.api import (ApiPodcastSchema, ApiPodcastConfigSchema,
@@ -46,7 +47,12 @@ def search_podcasts(search=None, limit=None):
         'title': podcast.title,
         'subtitle': podcast.subtitle,
         'updatedAt': podcast.updated_at,
-        'imageUrl': podcast.image_url,
+        'imageUrl': podcast.rss_image_url,
+        'images': generate_image_result({
+            'rssImage': podcast.rss_image_url,
+            'cover': podcast.cover_image_url,
+            'background': podcast.background_image_url
+        }),
         'author': podcast.author,
         'summary': podcast.summary,
     } for podcast in podcasts]
@@ -135,13 +141,17 @@ def get_podcasts(search=None, limit=None, sortOrder=None, nextCursor=None, prevC
 
 @jwt_required
 def get_all_podcasts():
-    rows = (db.session.query(Podcast.id, Podcast.title, Podcast.image_url)
+    rows = (db.session.query(Podcast.id, Podcast.title, Podcast.rss_image_url, Podcast.cover_image_url)
             .filter_by(status=PodcastStatus.ACTIVE)
             .all())
     return [{
         'id': r.id,
         'title': r.title,
-        'imageUrl': r.image_url
+        'imageUrl': r.rss_image_url,
+        'images': generate_image_result({
+            'rssImage': r.rss_image_url,
+            'cover': r.cover_image_url
+        }, sizes=[100])
     } for r in rows]
 
 
