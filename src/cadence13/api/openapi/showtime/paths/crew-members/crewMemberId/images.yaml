@@ -1,6 +1,8 @@
 get:
   summary: Fetch images for the cast/crew member
   operationId: crew.image.get_images
+  tags:
+    - crew
   parameters:
     - name: crewMemberId
       in: path

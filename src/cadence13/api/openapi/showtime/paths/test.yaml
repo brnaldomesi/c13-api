@@ -2,7 +2,7 @@ post:
   summary: Perform a POST against a JWT protected URL
   operationId: test.test_post
   tags:
-    - token
+    - test
   responses:
     "200":
       description: Test passed
@@ -16,7 +16,7 @@ get:
   summary: Perform a GET against a JWT protected URL
   operationId: test.test_get
   tags:
-    - networks
+    - test
   responses:
     "200":
       description: Test passed

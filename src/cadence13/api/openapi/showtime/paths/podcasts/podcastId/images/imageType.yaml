@@ -1,6 +1,8 @@
 patch:
   summary: Update the source image
   operationId: podcast.image.update_image
+  tags:
+    - podcasts
   parameters:
     - name: podcastId
       in: path
@@ -33,6 +35,8 @@ patch:
 delete:
   summary: Remove an image used by a cast/crew member
   operationId: podcast.image.delete_image
+  tags:
+    - podcasts
   parameters:
     - name: podcastId
       in: path
