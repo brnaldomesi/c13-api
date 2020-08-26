@@ -44,6 +44,7 @@ app = rest_app.app
 origins = [
     'http://localhost',
     'http://localhost:3000',
+    'http://showtime-localhost.cadence13.io:3000',
     'https://showtime.cadence13.com',
     'https://showtime-test.cadence13.io',
     'https://showtime-dev.cadence13.io'
@@ -62,6 +63,7 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 # Only allow JWT cookies to be sent over https. In production, this
 # should likely be True
 app.config['JWT_COOKIE_SECURE'] = os.environ.get('ENV', '').lower() in ('prod', 'test')
+app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
 
 # Set the cookie paths, so that you are only sending your access token
 # cookie to the access endpoints, and only sending your refresh token
