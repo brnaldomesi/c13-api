@@ -1,6 +1,8 @@
 post:
   summary: Request temporary authorization to upload an image
   operationId: podcast.image.create_presigned_post
+  tags:
+    - podcasts
   parameters:
     - name: podcastId
       in: path
