@@ -1,5 +1,6 @@
 from cadence13.api.util.logging import get_logger
 from marshmallow import Schema, fields, pre_load, post_dump
+from cadence13.api.showtime.controller.common.image import generate_image_result
 from .db import (
     PodcastSchema, PodcastConfigSchema, PodcastCategorySchema,
     EpisodeSchema, NetworkSchema)
@@ -43,9 +44,18 @@ class ApiPodcastSchema(PodcastSchema):
 
     @post_dump(pass_many=False)
     def post_dump(self, data, many, **kwargs):
-        # The image_url field is nested in imageUrls
+        # DEPRECATED: The image_url field is nested in imageUrls
         data['imageUrls'] = {'original': data['imageUrl']}
         del data['imageUrl']
+
+        data['images'] = generate_image_result({
+            'rssImage': data['rssImageUrl'],
+            'cover': data['coverImageUrl'],
+            'background': data['backgroundImageUrl']
+        })
+        del data['rssImageUrl']
+        del data['coverImageUrl']
+        del data['backgroundImageUrl']
 
         # Networks already get their own nested structure
         if 'networkId' in data:

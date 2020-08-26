@@ -1,0 +1,26 @@
+get:
+  summary: Return Show Hub config
+  operationId: showhub.get_config
+  tags:
+    - showhub
+  responses:
+    "200":
+      description: Config successfully retrieved
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/show_hub_config.yaml#/ShowHubConfig"
+patch:
+  summary: Update Show Hub config
+  operationId: showhub.update_config
+  tags:
+    - showhub
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/show_hub_config.yaml#/ShowHubConfig"
+  responses:
+    "204":
+      description: Config updated

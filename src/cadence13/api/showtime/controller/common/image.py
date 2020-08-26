@@ -11,6 +11,7 @@ from cadence13.api.util.db import db
 from cadence13.db.tables import S3Image
 
 PRESIGNED_POST_EXPIRATION = 600
+DEFAULT_SIZES = [100, 300, 1000]
 
 
 def create_presigned_post(file_name: str, content_type: str, prefix: str):
@@ -98,3 +99,19 @@ def generate_imgix_resized_url(url, size=0):
     parsed_url[4] = new_qs
 
     return urlunparse(parsed_url)
+
+
+def generate_image_result(urls: dict, sizes: list = None):
+    result = {}
+    if sizes is None:
+        sizes = DEFAULT_SIZES
+    for name, url in urls.items():
+        if not url:
+            continue
+        result[name] = {
+            'sourceUrl': url,
+            'sizes': {'original': generate_resized_url(url)}
+        }
+        for size in sizes:
+            result[name]['sizes'][f'{size}px'] = generate_resized_url(url, size)
+    return result

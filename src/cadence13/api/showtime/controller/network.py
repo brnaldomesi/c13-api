@@ -124,6 +124,22 @@ def update_network(networkId, body: dict):
 
 
 @jwt_required
+def delete_network(networkId):
+    row = (db.session.query(Network)
+            .filter(Network.id == networkId)
+            .one_or_none())
+
+    if not row:
+        return 'Not found', 404
+
+    schema = NetworkSchema()
+    result = schema.dump(row)
+    db.session.delete(row)
+    db.session.commit()
+    return result
+
+
+@jwt_required
 def get_podcasts(networkId):
     podcasts = (db.session.query(ApiPodcast)
                 .filter(ApiPodcast.network_id == networkId)

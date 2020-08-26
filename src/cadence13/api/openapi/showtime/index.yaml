@@ -82,6 +82,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a network
+      operationId: network.delete_network
+      tags:
+        - netwowrks
+      parameters:
+        - name: networkId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: Empty response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 
   /networks/{networkId}/podcasts:
     get:
@@ -673,9 +694,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /images/presigned-post:
-    $ref: "./paths/images/presigned-post.yaml"
-
   /podcasts/{podcastId}/presigned-post/{imageType}:
     $ref: "./paths/podcasts/podcastId/presigned-post/imageType.yaml"
 
@@ -696,6 +714,12 @@ paths:
 
   /crew-members/{crewMemberId}:
     $ref: "./paths/crew-members/crewMemberId.yaml"
+
+  /show-hub/config:
+    $ref: "./paths/show-hub/config.yaml"
+
+  /shuw-hub/presigned-post:
+    $ref: "./paths/show-hub/presigned-post.yaml"
 
 components:
   schemas:

@@ -1,0 +1,29 @@
+post:
+  summary: Request temporary authorization to upload an image
+  operationId: showhub.create_presigned_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - imageType
+            - fileName
+            - contentType
+          properties:
+            imageType:
+              type: string
+              enum:
+                - logo
+                - bgDesktop
+                - bgTabletLandscape
+                - bgTabletPortrait
+                - bgMobilePortrait
+            fileName:
+              type: string
+            contentType:
+              type: string
+  responses:
+    "200":
+      description: Temporary authorization granted
