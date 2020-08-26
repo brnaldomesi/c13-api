@@ -82,6 +82,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a network
+      operationId: network.delete_network
+      tags:
+        - netwowrks
+      parameters:
+        - name: networkId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: Empty response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 
   /networks/{networkId}/podcasts:
     get:
