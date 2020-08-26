@@ -1,0 +1,31 @@
+ShowHubConfig:
+  properties:
+    headline:
+      type: string
+      nullable: true
+    subHeadline:
+      type: string
+      nullable: true
+    images:
+      type: object
+      properties:
+        logo:
+          $ref: "#ShowHubImage"
+        bgDesktop:
+          $ref: "#ShowHubImage"
+        bgTabletLandscape:
+          $ref: "#ShowHubImage"
+        bgTabletPortrait:
+          $ref: "#ShowHubImage"
+        bgMobilePortrait:
+          $ref: "#ShowHubImage"
+
+
+ShowHubImage:
+  required:
+    - sourceUrl
+  properties:
+    sourceUrl:
+      type: string
+      nullable: true
+
