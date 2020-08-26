@@ -718,7 +718,7 @@ paths:
   /show-hub/config:
     $ref: "./paths/show-hub/config.yaml"
 
-  /shuw-hub/presigned-post:
+  /show-hub/presigned-post:
     $ref: "./paths/show-hub/presigned-post.yaml"
 
 components:
