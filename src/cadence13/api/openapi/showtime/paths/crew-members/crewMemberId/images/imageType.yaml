@@ -1,6 +1,8 @@
 patch:
   summary: Update the source image
   operationId: crew.image.update_image
+  tags:
+    - crew
   parameters:
     - name: crewMemberId
       in: path
@@ -32,6 +34,8 @@ patch:
 delete:
   summary: Remove an image used by a cast/crew member
   operationId: crew.image.delete_image
+  tags:
+    - crew
   parameters:
     - name: crewMemberId
       in: path

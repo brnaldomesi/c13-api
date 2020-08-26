@@ -1,6 +1,8 @@
 post:
   summary: Request temporary authorization to upload an image
   operationId: crew.image.create_presigned_post
+  tags:
+    - crew
   parameters:
     - name: crewMemberId
       in: path

@@ -1,6 +1,8 @@
 post:
   summary: Request temporary authorization to upload an image
   operationId: showhub.create_presigned_post
+  tags:
+    - showhub
   requestBody:
     required: true
     content:

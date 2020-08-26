@@ -1,6 +1,8 @@
 get:
   summary: Fetch images for the podcast
   operationId: podcast.image.get_images
+  tags:
+    - podcasts
   parameters:
     - name: podcastId
       in: path

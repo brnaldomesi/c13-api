@@ -12,8 +12,8 @@ paths:
     $ref: "./paths/podcasts_all.yaml"
   /networks:
     $ref: "./paths/networks.yaml"
-  /test:
-    $ref: "./paths/test.yaml"
+#  /test:
+#    $ref: "./paths/test.yaml"
   /token:
     $ref: "./paths/token.yaml"
   /token/auth:
@@ -86,7 +86,7 @@ paths:
       summary: Delete a network
       operationId: network.delete_network
       tags:
-        - netwowrks
+        - networks
       parameters:
         - name: networkId
           in: path
