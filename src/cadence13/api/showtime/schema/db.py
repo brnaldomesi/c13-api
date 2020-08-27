@@ -1,14 +1,18 @@
-from marshmallow import Schema, fields
+from argon2 import PasswordHasher
+from marshmallow import Schema, fields, pre_load
 from marshmallow_enum import EnumField
+
 import cadence13.db.enums.values as db_enums
+
+pw_hasher = PasswordHasher()
 
 
 class NetworkSchema(Schema):
     id = fields.UUID()
     name = fields.String()
     cover_img_url = fields.String()
-    status = fields.String()
-    publish_date = fields.DateTime()
+    status = EnumField(db_enums.NetworkStatus)
+    published_at = fields.DateTime()
 
 
 class PodcastSchema(Schema):
@@ -92,7 +96,14 @@ class UserSchema(Schema):
     first_name = fields.String(data_key='firstName')
     last_name = fields.String(data_key='lastName')
     email = fields.Email(data_key='email')
+    password = fields.String(load_only=True)
     is_active = fields.Boolean(data_key='isActive')
     is_registered = fields.Boolean(data_key='isRegistered')
     registered_at = fields.DateTime(data_key='registeredAt')
     created_at = fields.DateTime(data_key='createdAt')
+
+    @pre_load(pass_many=False)
+    def pre_load(self, data, many, **kwargs):
+        if 'password' in data:
+            data['password'] = pw_hasher.hash(data['password'])
+        return data
