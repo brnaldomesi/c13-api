@@ -11,8 +11,8 @@ class NetworkSchema(Schema):
     id = fields.UUID()
     name = fields.String()
     cover_img_url = fields.String()
-    status = fields.String()
-    publish_date = fields.DateTime()
+    status = EnumField(db_enums.NetworkStatus)
+    published_at = fields.DateTime()
 
 
 class PodcastSchema(Schema):
