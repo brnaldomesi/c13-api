@@ -730,11 +730,7 @@ components:
       $ref: "../common/components/schemas/category.yaml#/Category"
 
     ImageUrls:
-      properties:
-        original:
-          type: string
-        600px:
-          type: string
+      $ref: "../common/components/schemas/image_urls.yaml#ImageUrls"
 
     User:
       $ref: "../common/components/schemas/user.yaml#/User"
@@ -881,7 +877,7 @@ components:
           nullable: true
         feedUrl:
           type: string
-        imageUrls:
+        images:
           $ref: '#/components/schemas/ImageUrls'
         ownerName:
           type: string
