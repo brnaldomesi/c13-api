@@ -17,5 +17,5 @@ get:
                   type: string
                 title:
                   type: string
-                imageUrl:
-                  type: string
+                images:
+                  $ref: "../../common/components/schemas/image_urls.yaml#ImageUrls"

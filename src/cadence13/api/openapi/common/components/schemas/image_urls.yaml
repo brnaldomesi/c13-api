@@ -1,6 +1,13 @@
 ImageUrls:
-  properties:
-    original:
-      type: string
-    600px:
-      type: string
+  type: object
+  additionalProperties:
+    type: object
+    properties:
+      sourceUrl:
+        type: string
+        nullable: true
+      sizes:
+        type: object
+        additionalProperties:
+          type: string
+          nullable: true
