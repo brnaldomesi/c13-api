@@ -19,13 +19,13 @@ IMAGE_TYPE_PREFIX_MAP = {
 
 
 class ShowHubConfigSchema(Schema):
-    headline = fields.String()
-    sub_headline = fields.String(data_key='subHeadline')
-    logo_url = fields.String(data_key='logoUrl')
-    bg_desktop_url = fields.String(data_key='bgDesktopUrl')
-    bg_tablet_landscape_url = fields.String(data_key='bgTabletLandscapeUrl')
-    bg_tablet_portrait_url = fields.String(data_key='bgTabletPortraitUrl')
-    bg_mobile_portrait_url = fields.String(data_key='bgMobilePortraitUrl')
+    headline = fields.String(allow_none=True)
+    sub_headline = fields.String(data_key='subHeadline', allow_none=True)
+    logo_url = fields.String(data_key='logoUrl', allow_none=True)
+    bg_desktop_url = fields.String(data_key='bgDesktopUrl', allow_none=True)
+    bg_tablet_landscape_url = fields.String(data_key='bgTabletLandscapeUrl', allow_none=True)
+    bg_tablet_portrait_url = fields.String(data_key='bgTabletPortraitUrl', allow_none=True)
+    bg_mobile_portrait_url = fields.String(data_key='bgMobilePortraitUrl', allow_none=True)
 
     @pre_load(pass_many=False)
     def pre_load(self, data, many, **kwargs):
